@@ -61,3 +61,4 @@ dkms.conf
 *.vsix
 .vscode/launch.json
 .vscode/settings.json
+**/.vscode/
