@@ -18,11 +18,11 @@ void displayWord(const char word[], const bool guessed[]);
 
 void drawHangman(int tries);
 
-int loadWordsFromFile(const char *filename, struct WordHint wordList[], const int maxWords) {
+void loadWordsFromFile(const char *filename, struct WordHint wordList[], const int maxWords) {
     FILE *file = fopen(filename, "r");
     if (!file) {
         perror("Unable to open file");
-        return 0;
+        return;
     }
 
     int count = 0;
@@ -46,12 +46,11 @@ int loadWordsFromFile(const char *filename, struct WordHint wordList[], const in
     }
 
     fclose(file);
-    return count;
 }
 
 int main(void) {
     struct WordHint wordList[MAX_WORDS];
-    const int wordCount = loadWordsFromFile("./words.csv", wordList, MAX_WORDS);
+    loadWordsFromFile("./words.csv", wordList, MAX_WORDS);
 
     srand(time(NULL));
     const int wordIndex = rand() % 4;
@@ -59,7 +58,7 @@ int main(void) {
     const char *secretWord = wordList[wordIndex].word;
     const char *hint = wordList[wordIndex].hint;
 
-    int wordLength = strlen(secretWord);
+    const int wordLength = strlen(secretWord);
     char guessedWord[MAX_WORD_LENGTH] = {0};
     bool guessedLetters[26] = {false};
 
@@ -70,6 +69,7 @@ int main(void) {
 
     while (tries < MAX_TRIES) {
         printf("\n");
+
         displayWord(guessedWord, guessedLetters);
         drawHangman(tries);
 
