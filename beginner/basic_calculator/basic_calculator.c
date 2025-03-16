@@ -24,7 +24,7 @@ int main()
         if (b == 0)
             printf("\n\t\t\t\tDivision by zero is not allowed\n");
         else
-            printf("\n\t\t\t\tThe division of %d and %d is %d\n", a, b, a / b);
+            printf("\n\t\t\t\tThe division of %d and %d is %.2f\n", a, b, a / (double)b);
         break;
     default:
         printf("\n\t\t\t\tInvalid operation\n");
