@@ -15,7 +15,9 @@ double calculate(int a, int b, int op)
     case 4:
         return (b != 0) ? (double)a / b : 0;
     case 5:
-        return (double) pow(a, b); 
+        return (double) pow(a, b);
+    case 6:
+        return a % b;
     default:
         return -999999;
     }
