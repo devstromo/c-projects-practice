@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "basic_calculator.h"
 
 double calculate(int a, int b, int op)
@@ -13,6 +14,8 @@ double calculate(int a, int b, int op)
         return a * b;
     case 4:
         return (b != 0) ? (double)a / b : 0;
+    case 5:
+        return (double) pow(a, b); 
     default:
         return -999999;
     }

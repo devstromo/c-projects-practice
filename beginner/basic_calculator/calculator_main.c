@@ -8,7 +8,7 @@ int main()
     scanf("%d", &a);
     printf("Enter second integer number: ");
     scanf("%d", &b);
-    printf("Enter operation number\n1. Addition\n2. Subtraction\n3. Multiplication\n4. Division\n");
+    printf("Enter operation number\n1. Addition\n2. Subtraction\n3. Multiplication\n4. Division\n5. Power\n");
     scanf("%d", &op);
 
     if (op == 4 && b == 0)
