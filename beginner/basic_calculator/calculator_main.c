@@ -11,9 +11,9 @@ int main()
     printf("Enter operation number\n1. Addition\n2. Subtraction\n3. Multiplication\n4. Division\n5. Power\n6. Mod\n");
     scanf("%d", &op);
 
-    if (op == 4 && b == 0)
+    if ((op == 4 || op == 6) && b == 0)
     {
-        printf("\n\t\t\t\tDivision by zero is not allowed\n");
+        printf("\n\t\t\t\tError: Division or Modulus by zero is not allowed\n");
     }
     else
     {
