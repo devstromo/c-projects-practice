@@ -46,6 +46,18 @@ const char *get(SimpleMap *map, int key)
     return NULL;
 }
 
+const int containsKey(SimpleMap *map, int key)
+{
+    for (int i = 0; i < map->size; i++)
+    {
+        if (map->entries[i].key == key)
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
 int main()
 {
 
@@ -64,9 +76,19 @@ int main()
             printf("\n\t\t\t\tEnter task number: ");
             scanf("%d", &key);
             getchar(); // clear newline left by scanf
-            printf("\n\t\t\t\tEnter task description: ");
+            printf("\t\t\t\tEnter task description: ");
             fgets(value, sizeof(value), stdin);
             value[strcspn(value, "\n")] = 0; // remove the newline from input
+            if (containsKey(&map, key))
+            {
+                printf("\n\t\t\t\tTask already exists. Do you want to replace it[Y/n]?");
+                char ch;
+                scanf("%c", &ch);
+                if (ch == 'n' || ch == 'N')
+                {
+                    break;
+                }
+            }
             put(&map, key, value);
             break;
         }
@@ -90,7 +112,6 @@ int main()
             printf("\n\t\t\t\tInvalid choice\n");
             break;
         }
-        /* code */
     } while (choice != 3);
 
     return 0;
