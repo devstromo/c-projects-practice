@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define MAX_MAP_SIZE 100
 
@@ -47,6 +48,44 @@ const char *get(SimpleMap *map, int key)
 
 int main()
 {
+
+    int choice = 0;
+    SimpleMap map = {0};
+    do
+    {
+        printf("\n\t\t\t\tEnter 1 to add a task\n\t\t\t\tEnter 2 to view all tasks\n\t\t\t\tEnter 3 to exit\n\t\t\t\t");
+        scanf("%d", &choice);
+        switch (choice)
+        {
+        case 1:
+        {
+            int key;
+            char value[100];
+            printf("\n\t\t\t\tEnter task number: ");
+            scanf("%d", &key);
+            getchar(); // clear newline left by scanf
+            printf("\n\t\t\t\tEnter task description: ");
+            fgets(value, sizeof(value), stdin);
+            value[strcspn(value, "\n")] = 0; // remove the newline from input
+            put(&map, key, value);
+            break;
+        }
+        case 2:
+        {
+            for (int i = 0; i < map.size; i++)
+            {
+                printf("\n\t\t\t\tTask %d: %s\n", map.entries[i].key, map.entries[i].value);
+            }
+            break;
+        }
+        case 3:
+            break;
+        default:
+            printf("\n\t\t\t\tInvalid choice\n");
+            break;
+        }
+        /* code */
+    } while (choice != 3);
 
     return 0;
 }
