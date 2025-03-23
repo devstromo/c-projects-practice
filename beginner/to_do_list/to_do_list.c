@@ -72,6 +72,12 @@ int main()
         }
         case 2:
         {
+            if (map.size == 0)
+            {
+                printf("\n\t\t\t\tNo tasks added yet\n");
+                break;
+            }
+            printf("\n\t\t\t\tTasks:\n");
             for (int i = 0; i < map.size; i++)
             {
                 printf("\n\t\t\t\tTask %d: %s\n", map.entries[i].key, map.entries[i].value);
