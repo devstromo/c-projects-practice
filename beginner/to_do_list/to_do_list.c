@@ -65,7 +65,7 @@ int main()
     SimpleMap map = {0};
     do
     {
-        printf("\n\t\t\t\tEnter 1 to add a task\n\t\t\t\tEnter 2 to view all tasks\n\t\t\t\tEnter to 3 delete a task\n\t\t\t\tEnter 4 to exit\n\t\t\t\t");
+        printf("\n\t\t\t\tEnter 1 to add a task\n\t\t\t\tEnter 2 to view all tasks\n\t\t\t\tEnter 3 to delete a task\n\t\t\t\tEnter 4 to exit\n\t\t\t\t");
         scanf("%d", &choice);
         switch (choice)
         {
@@ -107,6 +107,29 @@ int main()
             break;
         }
         case 3:
+            int key;
+            printf("\n\t\t\t\tEnter task number: ");
+            scanf("%d", &key);
+            getchar();
+            if (containsKey(&map, key))
+            {
+                for (int i = 0; i < map.size; i++)
+                {
+                    if (map.entries[i].key == key)
+                    {
+                        for (int j = i; j < map.size - 1; j++)
+                        {
+                            map.entries[j] = map.entries[j + 1];
+                        }
+                        map.size--;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                printf("\n\t\t\t\tTask not found\n");
+            }
             break;
         case 4:
             break;    
