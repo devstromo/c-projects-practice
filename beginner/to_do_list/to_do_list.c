@@ -65,7 +65,7 @@ int main()
     SimpleMap map = {0};
     do
     {
-        printf("\n\t\t\t\tEnter 1 to add a task\n\t\t\t\tEnter 2 to view all tasks\n\t\t\t\tEnter 3 to exit\n\t\t\t\t");
+        printf("\n\t\t\t\tEnter 1 to add a task\n\t\t\t\tEnter 2 to view all tasks\n\t\t\t\tEnter to 3 delete a task\n\t\t\t\tEnter 4 to exit\n\t\t\t\t");
         scanf("%d", &choice);
         switch (choice)
         {
@@ -108,11 +108,13 @@ int main()
         }
         case 3:
             break;
+        case 4:
+            break;    
         default:
             printf("\n\t\t\t\tInvalid choice\n");
             break;
         }
-    } while (choice != 3);
+    } while (choice != 4);
 
     return 0;
 }
