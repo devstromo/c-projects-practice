@@ -166,6 +166,25 @@ int main()
             }
             break;
         case 5:
+            int getTaskNumber;
+            printf("\n\t\t\t\tEnter task number: ");
+            scanf("%d", &getTaskNumber);
+            getchar();
+            if (containsKey(&map, getTaskNumber))
+            {
+                for (int i = 0; i < map.size; i++)
+                {
+                    if (map.entries[i].key == getTaskNumber)
+                    {
+                        printf("\n\t\t\t\tTask %d: %s\n", map.entries[i].key, map.entries[i].value);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                printf("\n\t\t\t\tTask not found\n");
+            }
             break;
         case 6:
             break;    
