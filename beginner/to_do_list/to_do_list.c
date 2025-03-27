@@ -187,6 +187,7 @@ int main()
             }
             break;
         case 6:
+            printf("\n\t\t\t\tExiting\n");
             break;    
         default:
             printf("\n\t\t\t\tInvalid choice\n");
