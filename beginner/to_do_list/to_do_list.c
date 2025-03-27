@@ -141,6 +141,29 @@ int main()
             }
             break;
         case 4:
+            int taskNumber;
+            printf("\n\t\t\t\tEnter task number: ");
+            scanf("%d", &taskNumber);
+            getchar();
+            if (containsKey(&map, taskNumber))
+            {
+                for (int i = 0; i < map.size; i++)
+                {
+                    if (map.entries[i].key == taskNumber)
+                    {
+                        printf("\n\t\t\t\tTask %d: %s\n", map.entries[i].key, map.entries[i].value);
+                        printf("\n\t\t\t\tEnter new task description: ");
+                        fgets(map.entries[i].value, sizeof(map.entries[i].value), stdin);
+                        map.entries[i].value[strcspn(map.entries[i].value, "\n")] = 0;
+                        printf("\n\t\t\t\tTask updated\n");
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                printf("\n\t\t\t\tTask not found\n");
+            }
             break;
         case 5:
             break;
