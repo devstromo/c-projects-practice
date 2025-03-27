@@ -117,11 +117,20 @@ int main()
                 {
                     if (map.entries[i].key == key)
                     {
+                        printf("\n\t\t\t\tTask %d: %s\n", map.entries[i].key, map.entries[i].value);
+                        printf("\n\t\t\t\tDo you want to delete this task[Y/n]?");
+                        char ch;
+                        scanf("%c", &ch);
+                        if (ch == 'n' || ch == 'N')
+                        {
+                            break;
+                        }
                         for (int j = i; j < map.size - 1; j++)
                         {
                             map.entries[j] = map.entries[j + 1];
                         }
                         map.size--;
+                        printf("\n\t\t\t\tTask deleted\n");
                         break;
                     }
                 }
