@@ -11,6 +11,10 @@ typedef struct
     Cell cells[3][3];
 } Board;
 
+void printBoard(Board *board);
+void makeMove(Board *board, int row, int col, int player);
+int checkWin(Board *board, int player);
+
 int main()
 {
     Board board;
@@ -26,6 +30,23 @@ int main()
     printf("Initial board\n");
     printBoard(&board);
     int currentPlayer = PLAYER_X;
+    int moves = 0;
+    while (moves < 9)
+    {
+        int row, col;
+        printf("Player %d, enter your move (row and column): ", currentPlayer == PLAYER_X ? 1 : 2);
+        scanf("%d %d", &row, &col);
+        makeMove(&board, row - 1, col - 1, currentPlayer);
+        printBoard(&board);
+        if (checkWin(&board, currentPlayer))
+        {
+            printf("Player %d wins!\n", currentPlayer == PLAYER_X ? 1 : 2);
+            return 0;
+        }
+        currentPlayer = (currentPlayer == PLAYER_X) ? PLAYER_O : PLAYER_X;
+        moves++;
+    }
+    printf("It's a draw!\n");
     return 0;
 }
 
