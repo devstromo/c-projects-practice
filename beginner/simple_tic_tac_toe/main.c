@@ -6,6 +6,7 @@ typedef enum
     PLAYER_X,
     PLAYER_O
 } Cell;
+
 typedef struct
 {
     Cell cells[3][3];
@@ -35,7 +36,15 @@ int main()
     {
         int row, col;
         printf("Player %d, enter your move (row and column): ", currentPlayer == PLAYER_X ? 1 : 2);
-        scanf("%d %d", &row, &col);
+        if (scanf("%d %d", &row, &col) != 2) {
+            printf("Invalid input. Please enter two numbers.\n");
+            while (getchar() != '\n');
+            continue;
+        }
+        if (row < 1 || row > 3 || col < 1 || col > 3 || board.cells[row - 1][col - 1] != EMPTY) {
+            printf("Invalid move. Try again.\n");
+            continue;
+        }
         makeMove(&board, row - 1, col - 1, currentPlayer);
         printBoard(&board);
         if (checkWin(&board, currentPlayer))
