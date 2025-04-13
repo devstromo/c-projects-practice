@@ -1,8 +1,15 @@
-
+#include <stdio.h>
 
 int main()
 {
     int n;
+    FILE *record = fopen("student_record.record", "a+");
+    if (record == NULL)
+    {
+        printf("Error opening file.\n");
+        return 1;
+    }
+
 
     do
     {
