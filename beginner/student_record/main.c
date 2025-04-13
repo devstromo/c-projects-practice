@@ -1,5 +1,25 @@
 #include <stdio.h>
 
+int getLastId()
+{
+    FILE *idFile = fopen("last_id.txt", "r");
+    int id = 0;
+    if (idFile != NULL)
+    {
+        fscanf(idFile, "%d", &id);
+        fclose(idFile);
+    }
+    return id;
+}
+
+void saveLastId(int id) {
+    FILE *idFile = fopen("last_id.txt", "w");
+    if (idFile != NULL) {
+        fprintf(idFile, "%d", id);
+        fclose(idFile);
+    }
+}
+
 int main()
 {
     int n;
@@ -9,7 +29,6 @@ int main()
         printf("Error opening file.\n");
         return 1;
     }
-
 
     do
     {
@@ -35,31 +54,31 @@ int main()
         }
         switch (n)
         {
-            case 1:
-                printf("Adding a student...\n");
-                // Add student logic here
-                break;
-            case 2:
-                printf("Viewing all students...\n");
-                // View all students logic here
-                break;
-            case 3:
-                printf("Searching for a student...\n");
-                // Search for a student logic here
-                break;
-            case 4:
-                printf("Updating a student...\n");
-                // Update student logic here
-                break;
-            case 5:
-                printf("Deleting a student...\n");
-                // Delete student logic here
-                break;
-            case 6:
-                printf("Exiting the program...\n");
-                break;
-            default:
-                printf("Invalid choice. Please try again.\n");
+        case 1:
+            printf("Adding a student...\n");
+            // Add student logic here
+            break;
+        case 2:
+            printf("Viewing all students...\n");
+            // View all students logic here
+            break;
+        case 3:
+            printf("Searching for a student...\n");
+            // Search for a student logic here
+            break;
+        case 4:
+            printf("Updating a student...\n");
+            // Update student logic here
+            break;
+        case 5:
+            printf("Deleting a student...\n");
+            // Delete student logic here
+            break;
+        case 6:
+            printf("Exiting the program...\n");
+            break;
+        default:
+            printf("Invalid choice. Please try again.\n");
         }
     } while (n != 6);
 
