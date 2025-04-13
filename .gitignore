@@ -75,3 +75,5 @@ Makefile
 
 # CLion-specific files
 .idea/
+
+*.record
