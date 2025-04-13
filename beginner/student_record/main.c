@@ -2,7 +2,7 @@
 
 int getLastId()
 {
-    FILE *idFile = fopen("last_id.txt", "r");
+    FILE *idFile = fopen("last_id.sequence", "r");
     int id = 0;
     if (idFile != NULL)
     {
@@ -29,6 +29,15 @@ int main()
         printf("Error opening file.\n");
         return 1;
     }
+
+    // Initialize the sequence file if it doesn't exist
+    FILE *idFile = fopen("last_id.sequence", "r");
+    if (idFile == NULL)
+    {
+        initSequenceFile();
+        idFile = fopen("last_id.sequence", "r");
+    }
+
 
     do
     {
@@ -81,6 +90,9 @@ int main()
             printf("Invalid choice. Please try again.\n");
         }
     } while (n != 6);
+
+    fclose(record);
+    fclose(idFile);
 
     return 0;
 }
