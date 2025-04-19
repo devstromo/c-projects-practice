@@ -84,6 +84,17 @@ int main()
         case 1:
             printf("Adding a student...\n");
             // Add student logic here
+            Student student;
+            int id = getLastId();
+            student.id = id + 1;
+            printf("Enter student name: ");
+            scanf("%s", student.name);
+            printf("Enter student address: ");
+            scanf("%s", student.address);
+            printf("Enter student phone: ");
+            scanf("%s", student.phone);
+            fwrite(&student, sizeof(Student), 1, record);
+            saveLastId(student.id);
             break;
         case 2:
             printf("Viewing all students...\n");
