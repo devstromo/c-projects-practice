@@ -1,5 +1,16 @@
 #include <stdio.h>
 
+
+void initSequenceFile()
+{
+    FILE *idFile = fopen("last_id.sequence", "w");
+    if (idFile != NULL)
+    {
+        fprintf(idFile, "%d", 0); // Initialize with 0
+        fclose(idFile);
+    }
+}
+
 int getLastId()
 {
     FILE *idFile = fopen("last_id.sequence", "r");
