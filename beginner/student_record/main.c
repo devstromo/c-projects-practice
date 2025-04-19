@@ -94,6 +94,7 @@ int main()
             scanf("%s", student.phone);
             fwrite(&student, sizeof(Student), 1, record);
             saveLastId(student.id);
+            printf("Student added successfully.\n");
             break;
         case 2:
             printf("Viewing all students...\n");
