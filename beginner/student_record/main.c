@@ -1,5 +1,12 @@
 #include <stdio.h>
 
+typedef struct Student
+{
+    int id;
+    char name[50];
+    char address[100];
+    char phone[15];
+} Student;
 
 void initSequenceFile()
 {
