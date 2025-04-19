@@ -31,7 +31,7 @@ int getLastId()
 }
 
 void saveLastId(int id) {
-    FILE *idFile = fopen("last_id.txt", "w");
+    FILE *idFile = fopen("last_id.sequence", "w");
     if (idFile != NULL) {
         fprintf(idFile, "%d", id);
         fclose(idFile);
@@ -55,7 +55,6 @@ int main()
         initSequenceFile();
         idFile = fopen("last_id.sequence", "r");
     }
-
 
     do
     {
