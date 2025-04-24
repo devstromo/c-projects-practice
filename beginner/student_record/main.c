@@ -151,20 +151,12 @@ int main()
             int studentId;
             scanf("%d", &studentId);
 
-            // Open the original record file for reading
             FILE *readFile = fopen("student_record.record", "r");
-            if (readFile == NULL)
-            {
-                printf("Error opening student record file.\n");
-                break;
-            }
-
-            // Create a temp file to write updated data
             FILE *tempFile = fopen("temp.record", "w");
-            if (tempFile == NULL)
+
+            if (readFile == NULL || tempFile == NULL)
             {
-                printf("Error creating temporary file.\n");
-                fclose(readFile);
+                printf("Error opening files.\n");
                 break;
             }
 
@@ -175,7 +167,7 @@ int main()
             {
                 if (tempStudent1.id == studentId)
                 {
-                    studentFound = 1; // Skip writing this record
+                    studentFound = 1;
                 }
                 else
                 {
@@ -188,14 +180,13 @@ int main()
 
             if (studentFound)
             {
-                // Replace the original file with the new one
                 remove("student_record.record");
                 rename("temp.record", "student_record.record");
                 printf("Student with ID %d deleted successfully.\n", studentId);
             }
             else
             {
-                remove("temp.record"); // clean up unused temp file
+                remove("temp.record");
                 printf("Student with ID %d not found.\n", studentId);
             }
             break;
