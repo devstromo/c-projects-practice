@@ -43,12 +43,6 @@ void saveLastId(int id)
 int main()
 {
     int n;
-    FILE *record = fopen("student_record.record", "a+");
-    if (record == NULL)
-    {
-        printf("Error opening file.\n");
-        return 1;
-    }
 
     // Initialize the sequence file if it doesn't exist
     FILE *idFile = fopen("last_id.sequence", "r");
@@ -84,17 +78,28 @@ int main()
         {
         case 1:
             printf("Adding a student...\n");
-            // Add student logic here
+
             Student student;
             int id = getLastId();
             student.id = id + 1;
+
             printf("Enter student name: ");
             scanf("%s", student.name);
             printf("Enter student address: ");
             scanf("%s", student.address);
             printf("Enter student phone: ");
             scanf("%s", student.phone);
-            fwrite(&student, sizeof(Student), 1, record);
+
+            FILE *addFile = fopen("student_record.record", "a");
+            if (addFile == NULL)
+            {
+                printf("Error opening file for writing.\n");
+                break;
+            }
+
+            fwrite(&student, sizeof(Student), 1, addFile);
+            fclose(addFile);
+
             saveLastId(student.id);
             printf("Student added successfully.\n");
             break;
@@ -108,14 +113,14 @@ int main()
                 break;
             }
 
-            Student tempStudent;
+            Student tempStudentView;
             int any = 0;
-            while (fread(&tempStudent, sizeof(Student), 1, recordView) == 1)
+            while (fread(&tempStudentView, sizeof(Student), 1, recordView) == 1)
             {
-                printf("ID: %d\n", tempStudent.id);
-                printf("Name: %s\n", tempStudent.name);
-                printf("Address: %s\n", tempStudent.address);
-                printf("Phone: %s\n", tempStudent.phone);
+                printf("ID: %d\n", tempStudentView.id);
+                printf("Name: %s\n", tempStudentView.name);
+                printf("Address: %s\n", tempStudentView.address);
+                printf("Phone: %s\n", tempStudentView.phone);
                 printf("-------------------------\n");
                 any = 1;
             }
@@ -129,13 +134,21 @@ int main()
             break;
         case 3:
             printf("Searching for a student...\n");
-            // Search for a student logic here
+
             int searchId;
             printf("Enter student ID to search: ");
             scanf("%d", &searchId);
-            fseek(record, 0, SEEK_SET); // Reset file pointer to the beginning
+
+            FILE *searchFile = fopen("student_record.record", "r");
+            if (searchFile == NULL)
+            {
+                printf("Error opening file for reading.\n");
+                break;
+            }
+
+            Student tempStudent;
             int found = 0;
-            while (fread(&tempStudent, sizeof(Student), 1, record) == 1)
+            while (fread(&tempStudent, sizeof(Student), 1, searchFile) == 1)
             {
                 if (tempStudent.id == searchId)
                 {
@@ -147,6 +160,9 @@ int main()
                     break;
                 }
             }
+
+            fclose(searchFile);
+
             if (!found)
             {
                 printf("Student with ID %d not found.\n", searchId);
@@ -209,7 +225,6 @@ int main()
         }
     } while (n != 6);
 
-    fclose(record);
     fclose(idFile);
 
     return 0;
