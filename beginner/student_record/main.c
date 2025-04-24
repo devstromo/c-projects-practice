@@ -147,7 +147,57 @@ int main()
             break;
         case 5:
             printf("Deleting a student...\n");
-            // Delete student logic here
+            printf("Enter student ID to delete: ");
+            int studentId;
+            scanf("%d", &studentId);
+
+            // Open the original record file for reading
+            FILE *readFile = fopen("student_record.record", "r");
+            if (readFile == NULL)
+            {
+                printf("Error opening student record file.\n");
+                break;
+            }
+
+            // Create a temp file to write updated data
+            FILE *tempFile = fopen("temp.record", "w");
+            if (tempFile == NULL)
+            {
+                printf("Error creating temporary file.\n");
+                fclose(readFile);
+                break;
+            }
+
+            int studentFound = 0;
+            Student tempStudent1;
+
+            while (fread(&tempStudent1, sizeof(Student), 1, readFile) == 1)
+            {
+                if (tempStudent1.id == studentId)
+                {
+                    studentFound = 1; // Skip writing this record
+                }
+                else
+                {
+                    fwrite(&tempStudent1, sizeof(Student), 1, tempFile);
+                }
+            }
+
+            fclose(readFile);
+            fclose(tempFile);
+
+            if (studentFound)
+            {
+                // Replace the original file with the new one
+                remove("student_record.record");
+                rename("temp.record", "student_record.record");
+                printf("Student with ID %d deleted successfully.\n", studentId);
+            }
+            else
+            {
+                remove("temp.record"); // clean up unused temp file
+                printf("Student with ID %d not found.\n", studentId);
+            }
             break;
         case 6:
             printf("Exiting the program...\n");
