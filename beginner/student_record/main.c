@@ -30,9 +30,11 @@ int getLastId()
     return id;
 }
 
-void saveLastId(int id) {
+void saveLastId(int id)
+{
     FILE *idFile = fopen("last_id.sequence", "w");
-    if (idFile != NULL) {
+    if (idFile != NULL)
+    {
         fprintf(idFile, "%d", id);
         fclose(idFile);
     }
@@ -99,6 +101,20 @@ int main()
         case 2:
             printf("Viewing all students...\n");
             // View all students logic here
+            fseek(record, 0, SEEK_SET); // Reset file pointer to the beginning
+            Student tempStudent;
+            while (fread(&tempStudent, sizeof(Student), 1, record) == 1)
+            {
+                printf("ID: %d\n", tempStudent.id);
+                printf("Name: %s\n", tempStudent.name);
+                printf("Address: %s\n", tempStudent.address);
+                printf("Phone: %s\n", tempStudent.phone);
+                printf("-------------------------\n");
+            }
+            if (ftell(record) == 0) // Check if the file is empty
+            {
+                printf("No students found.\n");
+            }
             break;
         case 3:
             printf("Searching for a student...\n");
