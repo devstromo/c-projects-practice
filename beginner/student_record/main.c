@@ -119,6 +119,27 @@ int main()
         case 3:
             printf("Searching for a student...\n");
             // Search for a student logic here
+            int searchId;
+            printf("Enter student ID to search: ");
+            scanf("%d", &searchId);
+            fseek(record, 0, SEEK_SET); // Reset file pointer to the beginning
+            int found = 0;
+            while (fread(&tempStudent, sizeof(Student), 1, record) == 1)
+            {
+                if (tempStudent.id == searchId)
+                {
+                    printf("ID: %d\n", tempStudent.id);
+                    printf("Name: %s\n", tempStudent.name);
+                    printf("Address: %s\n", tempStudent.address);
+                    printf("Phone: %s\n", tempStudent.phone);
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                printf("Student with ID %d not found.\n", searchId);
+            }
             break;
         case 4:
             printf("Updating a student...\n");
