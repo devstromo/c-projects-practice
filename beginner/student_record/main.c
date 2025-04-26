@@ -171,6 +171,49 @@ int main()
         case 4:
             printf("Updating a student...\n");
             // Update student logic here
+            int updateId;
+            printf("Enter student ID to update: ");
+            scanf("%d", &updateId);
+            FILE *readFile = fopen("student_record.record", "r");
+            FILE *tempFile = fopen("temp.record", "w");
+
+            if (readFile == NULL || tempFile == NULL)
+            {
+                printf("Error opening files.\n");
+                break;
+            }
+            
+            int studentFoundUpdate = 0;
+            Student tempStudentUpdate;
+            while (fread(&tempStudentUpdate, sizeof(Student), 1, readFile) == 1)
+            {
+                if (tempStudentUpdate.id == updateId)
+                {
+                    studentFoundUpdate = 1;
+                    printf("Enter new name: ");
+                    scanf("%s", tempStudentUpdate.name);
+                    printf("Enter new address: ");
+                    scanf("%s", tempStudentUpdate.address);
+                    printf("Enter new phone: ");
+                    scanf("%s", tempStudentUpdate.phone);
+                }
+                fwrite(&tempStudentUpdate, sizeof(Student), 1, tempFile);
+            }
+
+            fclose(readFile);
+            fclose(tempFile);
+            if (studentFoundUpdate)
+            {
+                remove("student_record.record");
+                rename("temp.record", "student_record.record");
+                printf("Student with ID %d updated successfully.\n", updateId);
+            }
+            else
+            {
+                remove("temp.record");
+                printf("Student with ID %d not found.\n", updateId);
+            }
+
             break;
         case 5:
             printf("Deleting a student...\n");
