@@ -181,7 +181,7 @@ int main()
                 printf("Error opening files.\n");
                 break;
             }
-            
+
             int studentFoundUpdate = 0;
             Student tempStudentUpdate;
             while (fread(&tempStudentUpdate, sizeof(Student), 1, updateReadFile) == 1)
@@ -190,11 +190,11 @@ int main()
                 {
                     studentFoundUpdate = 1;
                     printf("Enter new name: ");
-                    scanf("%s", tempStudentUpdate.name);
+                    scanf(" %[^\n]", tempStudentUpdate.name);
                     printf("Enter new address: ");
-                    scanf("%s", tempStudentUpdate.address);
+                    scanf(" %[^\n]", tempStudentUpdate.address);
                     printf("Enter new phone: ");
-                    scanf("%s", tempStudentUpdate.phone);
+                    scanf(" %[^\n]", tempStudentUpdate.phone);
                 }
                 fwrite(&tempStudentUpdate, sizeof(Student), 1, updateTempFile);
             }
