@@ -170,14 +170,13 @@ int main()
             break;
         case 4:
             printf("Updating a student...\n");
-            // Update student logic here
             int updateId;
             printf("Enter student ID to update: ");
             scanf("%d", &updateId);
-            FILE *readFile = fopen("student_record.record", "r");
-            FILE *tempFile = fopen("temp.record", "w");
+            FILE *updateReadFile = fopen("student_record.record", "r");
+            FILE *updateTempFile = fopen("temp.record", "w");
 
-            if (readFile == NULL || tempFile == NULL)
+            if (updateReadFile == NULL || updateTempFile == NULL)
             {
                 printf("Error opening files.\n");
                 break;
@@ -185,7 +184,7 @@ int main()
             
             int studentFoundUpdate = 0;
             Student tempStudentUpdate;
-            while (fread(&tempStudentUpdate, sizeof(Student), 1, readFile) == 1)
+            while (fread(&tempStudentUpdate, sizeof(Student), 1, updateReadFile) == 1)
             {
                 if (tempStudentUpdate.id == updateId)
                 {
@@ -197,11 +196,11 @@ int main()
                     printf("Enter new phone: ");
                     scanf("%s", tempStudentUpdate.phone);
                 }
-                fwrite(&tempStudentUpdate, sizeof(Student), 1, tempFile);
+                fwrite(&tempStudentUpdate, sizeof(Student), 1, updateTempFile);
             }
 
-            fclose(readFile);
-            fclose(tempFile);
+            fclose(updateReadFile);
+            fclose(updateTempFile);
             if (studentFoundUpdate)
             {
                 remove("student_record.record");
