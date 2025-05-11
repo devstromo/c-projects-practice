@@ -1,36 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 typedef struct BankAccount
 {
     int accountNumber;
     char accountHolder[50];
     double balance;
-    char accountType[20]; // e.g., Savings, Checking
-    char dateOpened[11]; // Format: YYYY-MM-DD
+    char accountType[20];         // e.g., Savings, Checking
+    char dateOpened[11];          // Format: YYYY-MM-DD
     char lastTransactionDate[11]; // Format: YYYY-MM-DD
 } BankAccount;
 
 // MAIN
 
-int main() {
+int main()
+{
     int option;
 
-    printf("Welcome to the Bank Account Management System!\n");
-    printf("1. Add a new account\n");
-    printf("2. View all accounts\n");
-    printf("3. Search for an account\n");
-    printf("4. Update an account\n");
-    printf("5. Delete an account\n");
-    printf("6. Exit\n");
-    printf("Please select an option (1-6): ");
-    scanf("%d", &option);
-    if (option < 1 || option > 6) {
-        printf("Invalid option. Please select a number between 1 and 6.\n");
-        return 1;
-    }
-    switch (option) {
+    do
+    {
+        printf("Welcome to the Bank Account Management System!\n");
+        printf("1. Add a new account\n");
+        printf("2. View all accounts\n");
+        printf("3. Search for an account\n");
+        printf("4. Update an account\n");
+        printf("5. Delete an account\n");
+        printf("6. Exit\n");
+        printf("Please select an option (1-6): ");
+        scanf("%d", &option);
+        if (option < 1 || option > 6)
+        {
+            printf("Invalid option. Please select a number between 1 and 6.\n");
+            return 1;
+        }
+        switch (option)
+        {
         case 1:
             printf("Adding a new account...\n");
             // Code to add a new account
@@ -56,7 +60,8 @@ int main() {
             break;
         default:
             printf("Invalid option. Please select a number between 1 and 6.\n");
-    }
-    
+        }
+    } while (option != 6);
+
     return 0;
 }
