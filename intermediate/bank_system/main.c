@@ -11,10 +11,45 @@ typedef struct BankAccount
     char lastTransactionDate[11]; // Format: YYYY-MM-DD
 } BankAccount;
 
+void initBankAccountSequenceFile()
+{
+    FILE *idFile = fopen("bank_account.seq", "w");
+    if (idFile != NULL)
+    {
+        fprintf(idFile, "%d", 0); // Initialize with 0
+        fclose(idFile);
+    }
+}
+
+void initLedgerEntrySequenceFile()
+{
+    FILE *idFile = fopen("ledger_entry.seq", "w");
+    if (idFile != NULL)
+    {
+        fprintf(idFile, "%d", 0); // Initialize with 0
+        fclose(idFile);
+    }
+}
+
 // MAIN
 
 int main()
 {
+
+    // Initialize the sequence files if they don't exist
+    FILE *idFile = fopen("bank_account.seq", "r");
+    if (idFile == NULL)
+    {
+        initBankAccountSequenceFile();
+        idFile = fopen("bank_account.seq", "r");
+    }
+    FILE *ledgerFile = fopen("ledger_entry.seq", "r");
+    if (ledgerFile == NULL)
+    {
+        initLedgerEntrySequenceFile();
+        ledgerFile = fopen("ledger_entry.seq", "r");
+    }
+
     int option;
 
     do
