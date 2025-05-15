@@ -52,6 +52,17 @@ void initBankAccountDB()
     }
 }
 
+void initLedgerDB()
+{
+    FILE *file = fopen("ledger.csv", "r");
+    if (file == NULL)
+    {
+        file = fopen("ledger.csv", "w");
+        fprintf(file, "TransactionId,FromAccount,ToAccount,Amount,Date,Note\n");
+        fclose(file);
+    }
+}
+
 // MAIN
 
 int main()
@@ -73,6 +84,8 @@ int main()
         initLedgerEntrySequenceFile();
         ledgerFile = fopen("ledger_entry.seq", "r");
     }
+    // Initialize the ledger database file if it doesn't exist
+    initLedgerDB();
 
     int option;
 
