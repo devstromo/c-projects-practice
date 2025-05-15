@@ -73,6 +73,31 @@ void escapeCsvField(char *dest, const char *src) {
     *dest = '\0';
 }
 
+void writeBankAccountToCSV(BankAccount *account)
+{
+    FILE *file = fopen("accounts.csv", "a");
+    if (file != NULL)
+    {
+        char accountHolder[100];
+        escapeCsvField(accountHolder, account->accountHolder);
+        char accountType[100];
+        escapeCsvField(accountType, account->accountType);
+        char dateOpened[100];
+        escapeCsvField(dateOpened, account->dateOpened);
+        char lastTransactionDate[100];
+        escapeCsvField(lastTransactionDate, account->lastTransactionDate);
+
+        fprintf(file, "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                account->accountNumber,
+                accountHolder,
+                account->balance,
+                accountType,
+                dateOpened,
+                lastTransactionDate);
+        fclose(file);
+    }
+}
+
 // MAIN
 
 int main()
