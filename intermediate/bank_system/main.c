@@ -40,6 +40,17 @@ void initLedgerEntrySequenceFile()
     }
 }
 
+void initBankAccountDB()
+{
+    FILE *file = fopen("accounts.csv", "r");
+    if (file == NULL)
+    {
+        file = fopen("accounts.csv", "w");
+        fprintf(file, "AccountNumber,AccountHolder,Balance,AccountType,DateOpened,LastTransactionDate\n");
+        fclose(file);
+    }
+}
+
 // MAIN
 
 int main()
@@ -52,6 +63,9 @@ int main()
         initBankAccountSequenceFile();
         idFile = fopen("bank_account.seq", "r");
     }
+
+    // Initialize the database file if it doesn't exist
+    initBankAccountDB();
     FILE *ledgerFile = fopen("ledger_entry.seq", "r");
     if (ledgerFile == NULL)
     {
