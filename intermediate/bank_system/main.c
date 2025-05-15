@@ -11,13 +11,14 @@ typedef struct BankAccount
     char lastTransactionDate[11]; // Format: YYYY-MM-DD
 } BankAccount;
 
-typedef struct LedgerEntry {
+typedef struct LedgerEntry
+{
     int transactionId;
     int fromAccount;
     int toAccount;
     double amount;
-    char date[11];     // Format: YYYY-MM-DD
-    char note[100];    // Optional note: e.g., "transfer", "deposit", etc.
+    char date[11];  // Format: YYYY-MM-DD
+    char note[100]; // Optional note: e.g., "transfer", "deposit", etc.
 } LedgerEntry;
 
 void initBankAccountSequenceFile()
