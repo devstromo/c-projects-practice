@@ -98,6 +98,24 @@ void writeBankAccountToCSV(BankAccount *account)
     }
 }
 
+void writeLedgerEntryToCSV(LedgerEntry *entry)
+{
+    FILE *file = fopen("ledger.csv", "a");
+    if (file != NULL)
+    {
+        char note[100];
+        escapeCsvField(note, entry->note);
+        fprintf(file, "%d,%d,%d,%.2f,%s,\"%s\"\n",
+                entry->transactionId,
+                entry->fromAccount,
+                entry->toAccount,
+                entry->amount,
+                entry->date,
+                note);
+        fclose(file);
+    }
+}
+
 // MAIN
 
 int main()
