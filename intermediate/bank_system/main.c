@@ -63,6 +63,16 @@ void initLedgerDB()
     }
 }
 
+void escapeCsvField(char *dest, const char *src) {
+    while (*src) {
+        if (*src == '"') {
+            *dest++ = '"'; // double the quote
+        }
+        *dest++ = *src++;
+    }
+    *dest = '\0';
+}
+
 // MAIN
 
 int main()
