@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-
 typedef struct BankAccount
 {
     int accountNumber;
@@ -29,6 +28,28 @@ void initBankAccountSequenceFile()
     if (idFile != NULL)
     {
         fprintf(idFile, "%d", 0); // Initialize with 0
+        fclose(idFile);
+    }
+}
+
+int getLastBankAccountId()
+{
+    FILE *idFile = fopen("last_id.sequence", "r");
+    int id = 0;
+    if (idFile != NULL)
+    {
+        fscanf(idFile, "%d", &id);
+        fclose(idFile);
+    }
+    return id;
+}
+
+void saveLastBankAccountId(int id)
+{
+    FILE *idFile = fopen("bank_account.seq", "w");
+    if (idFile != NULL)
+    {
+        fprintf(idFile, "%d", id);
         fclose(idFile);
     }
 }
@@ -121,7 +142,8 @@ void writeLedgerEntryToCSV(LedgerEntry *entry)
     }
 }
 
-void getCurrentDate(char *buffer, size_t size) {
+void getCurrentDate(char *buffer, size_t size)
+{
     time_t t = time(NULL);
     struct tm *tm_info = localtime(&t);
     strftime(buffer, size, "%Y-%m-%d", tm_info);
