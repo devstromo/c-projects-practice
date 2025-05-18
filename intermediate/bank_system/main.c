@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
 
 typedef struct BankAccount
 {
@@ -119,6 +121,11 @@ void writeLedgerEntryToCSV(LedgerEntry *entry)
     }
 }
 
+void getCurrentDate(char *buffer, size_t size) {
+    time_t t = time(NULL);
+    struct tm *tm_info = localtime(&t);
+    strftime(buffer, size, "%Y-%m-%d", tm_info);
+}
 // MAIN
 
 int main()
