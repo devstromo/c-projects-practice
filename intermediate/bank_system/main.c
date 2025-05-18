@@ -126,8 +126,8 @@ void getCurrentDate(char *buffer, size_t size) {
     struct tm *tm_info = localtime(&t);
     strftime(buffer, size, "%Y-%m-%d", tm_info);
 }
-// MAIN
 
+// MAIN
 int main()
 {
 
@@ -173,8 +173,6 @@ int main()
         case 1:
             printf("Adding a new account...\n");
             BankAccount newAccount;
-            printf("Enter account number: ");
-            scanf("%d", &newAccount.accountNumber);
             printf("Enter account holder name: ");
             scanf(" %[^\n]", newAccount.accountHolder);
             printf("Enter balance: ");
