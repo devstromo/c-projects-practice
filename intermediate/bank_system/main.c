@@ -63,9 +63,12 @@ void initLedgerDB()
     }
 }
 
-void escapeCsvField(char *dest, const char *src) {
-    while (*src) {
-        if (*src == '"') {
+void escapeCsvField(char *dest, const char *src)
+{
+    while (*src)
+    {
+        if (*src == '"')
+        {
             *dest++ = '"'; // double the quote
         }
         *dest++ = *src++;
@@ -162,6 +165,20 @@ int main()
         {
         case 1:
             printf("Adding a new account...\n");
+            BankAccount newAccount;
+            printf("Enter account number: ");
+            scanf("%d", &newAccount.accountNumber);
+            printf("Enter account holder name: ");
+            scanf(" %[^\n]", newAccount.accountHolder);
+            printf("Enter balance: ");
+            scanf("%lf", &newAccount.balance);
+            printf("Enter account type (e.g., Savings, Checking): ");
+            scanf(" %[^\n]", newAccount.accountType);
+            newAccount.dateOpened[0] = "2023-10-01";
+            printf("Enter last transaction date (YYYY-MM-DD): ");
+            newAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
+            writeBankAccountToCSV(&newAccount);
+            printf("Account added successfully!\n");
             // Code to add a new account
             break;
         case 2:
