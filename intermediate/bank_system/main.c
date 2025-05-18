@@ -181,8 +181,7 @@ int main()
             scanf("%lf", &newAccount.balance);
             printf("Enter account type (e.g., Savings, Checking): ");
             scanf(" %[^\n]", newAccount.accountType);
-            newAccount.dateOpened[0] = "2023-10-01";
-            printf("Enter last transaction date (YYYY-MM-DD): ");
+            getCurrentDate(newAccount.dateOpened, sizeof(newAccount.dateOpened));
             newAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
             writeBankAccountToCSV(&newAccount);
             printf("Account added successfully!\n");
