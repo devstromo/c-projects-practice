@@ -220,14 +220,10 @@ int main()
             int any = 0;
             while (fgets(line, sizeof(line), recordView))
             {
-                if (any == 0)
-                {
-                    printf("AccountNumber,AccountHolder,Balance,AccountType,DateOpened,LastTransactionDate\n");
-                }
                 printf("%s", line);
-                any = 1;
+                any++;
             }
-            if (!any)
+            if (any<=1)
             {
                 printf("No accounts found.\n");
             }
