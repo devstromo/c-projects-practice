@@ -220,16 +220,17 @@ int main()
             int any = 0;
             while (fgets(line, sizeof(line), recordView))
             {
-                if (line[0] == '\n') // Skip empty lines
-                    continue;
-                if (any == 0)
-                    continue; // Skip the header line
+                if (any == 0 && line[0] == 'A') // Check if it's the header line
+                {
+                    any = 1;  // Mark that we have printed the header
+                    continue; // Skip printing the header again
+                }
                 printf("%s", line);
                 any++;
             }
-            if (any <= 1)
+            if (any == 1)
             {
-                printf("No accounts found.\n");
+                printf("\n\nNo accounts found.\n\n");
             }
             fclose(recordView);
             break;
