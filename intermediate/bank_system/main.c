@@ -220,10 +220,14 @@ int main()
             int any = 0;
             while (fgets(line, sizeof(line), recordView))
             {
+                if (line[0] == '\n') // Skip empty lines
+                    continue;
+                if (any == 0)
+                    continue; // Skip the header line
                 printf("%s", line);
                 any++;
             }
-            if (any<=1)
+            if (any <= 1)
             {
                 printf("No accounts found.\n");
             }
