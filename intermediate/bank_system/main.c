@@ -210,7 +210,28 @@ int main()
             break;
         case 2:
             printf("Viewing all accounts...\n");
-            // Code to view all accounts
+            FILE *recordView = fopen("accounts.csv", "r");
+            if (recordView == NULL)
+            {
+                printf("No accounts found (file missing).\n");
+                break;
+            }
+            char line[256];
+            int any = 0;
+            while (fgets(line, sizeof(line), recordView))
+            {
+                if (any == 0)
+                {
+                    printf("AccountNumber,AccountHolder,Balance,AccountType,DateOpened,LastTransactionDate\n");
+                }
+                printf("%s", line);
+                any = 1;
+            }
+            if (!any)
+            {
+                printf("No accounts found.\n");
+            }
+            fclose(recordView);
             break;
         case 3:
             printf("Searching for an account...\n");
