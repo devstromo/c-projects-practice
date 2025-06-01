@@ -151,6 +151,81 @@ void getCurrentDate(char *buffer, size_t size)
     strftime(buffer, size, "%Y-%m-%d", tm_info);
 }
 
+void deleteAccountByNumber()
+{
+    FILE *recordDelete = fopen("accounts.csv", "r");
+    if (recordDelete == NULL)
+    {
+        printf("No accounts found (file missing).\n");
+        return;
+    }
+
+    printf("Enter account number to delete: ");
+    int accountNumberToDelete;
+    scanf("%d", &accountNumberToDelete);
+
+    FILE *tempFile = fopen("temp_accounts.csv", "w");
+    if (tempFile == NULL)
+    {
+        printf("Error creating temporary file.\n");
+        fclose(recordDelete);
+        return;
+    }
+
+    char deleteLine[256];
+    int anyDelete = 0;
+    int accountFound = 0;
+
+    while (fgets(deleteLine, sizeof(deleteLine), recordDelete))
+    {
+        // Si es la línea del encabezado (empieza con 'A'), la copiamos y seguimos
+        if (anyDelete == 0 && deleteLine[0] == 'A')
+        {
+            anyDelete = 1;
+            fprintf(tempFile, "%s", deleteLine);
+            continue;
+        }
+
+        // Para cada línea de datos, extraemos el accountNumber (antes de la primera coma)
+        int accountNumber;
+        sscanf(deleteLine, "%d", &accountNumber);
+        if (accountNumber != accountNumberToDelete)
+        {
+            // Si no coincide con el número a borrar, la copiamos al temp
+            fprintf(tempFile, "%s", deleteLine);
+        }
+        else
+        {
+            // Si coincide, marcamos que encontramos la cuenta
+            accountFound = 1;
+        }
+    }
+
+    fclose(recordDelete);
+    fclose(tempFile);
+
+    // Intentamos eliminar el CSV original
+    if (remove("accounts.csv") != 0)
+    {
+        perror("Error al eliminar accounts.csv");
+        // Opcionalmente podrías renombrar temp de vuelta o abortar aquí
+    }
+    // Intentamos renombrar temp a accounts.csv
+    if (rename("temp_accounts.csv", "accounts.csv") != 0)
+    {
+        perror("Error al renombrar temp_accounts.csv a accounts.csv");
+    }
+
+    if (!accountFound)
+    {
+        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToDelete);
+    }
+    else
+    {
+        printf("Account with number %d deleted successfully!\n", accountNumberToDelete);
+    }
+}
+
 // MAIN
 int main()
 {
@@ -272,56 +347,7 @@ int main()
             break;
         case 5:
             printf("Deleting an account...\n");
-
-            FILE *recordDelete = fopen("accounts.csv", "r");
-            if (recordDelete == NULL)
-            {
-                printf("No accounts found (file missing).\n");
-                break;
-            }
-            char deleteLine[256];
-            int anyDelete = 0;
-            int accountNumberToDelete;
-            int accountFound = 0;
-            printf("Enter account number to delete: ");
-            scanf("%d", &accountNumberToDelete);
-            FILE *tempFile = fopen("temp_accounts.csv", "w");
-            if (tempFile == NULL)
-            {
-                printf("Error creating temporary file.\n");
-                fclose(recordDelete);
-                break;
-            }
-            while (fgets(deleteLine, sizeof(deleteLine), recordDelete))
-            {
-                if (anyDelete == 0 && deleteLine[0] == 'A') // Check if it's the header line
-                {
-                    anyDelete = 1;                       // Mark that we have printed the header
-                    fprintf(tempFile, "%s", deleteLine); // Write header to temp file
-                    continue;                            // Skip printing the header again
-                }
-                int accountNumber;
-                sscanf(deleteLine, "%d", &accountNumber);
-                if (accountNumber != accountNumberToDelete)
-                {
-                    fprintf(tempFile, "%s", deleteLine); // Write to temp file if not deleting
-                } else {
-                    accountFound = 1; // Mark that we found the account to delete
-                }
-            }
-            fclose(recordDelete);
-            fclose(tempFile);
-            remove("accounts.csv");
-            rename("temp_accounts.csv", "accounts.csv");
-            if (accountFound == 0)
-            {
-                printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToDelete);
-            }
-            else
-            {
-                printf("Account deleted successfully.\n");
-                printf("Account with number %d deleted successfully!\n", accountNumberToDelete);
-            }
+            deleteAccountByNumber();
             break;
         case 6:
             printf("Exiting the program...\n");
