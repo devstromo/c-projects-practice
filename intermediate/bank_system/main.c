@@ -73,6 +73,9 @@ void initBankAccountDB()
         file = fopen("accounts.csv", "w");
         fprintf(file, "AccountNumber,AccountHolder,Balance,AccountType,DateOpened,LastTransactionDate\n");
         fclose(file);
+    } else
+    {
+        fclose(file);
     }
 }
 
