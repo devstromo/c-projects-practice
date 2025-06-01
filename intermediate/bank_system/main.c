@@ -272,7 +272,56 @@ int main()
             break;
         case 5:
             printf("Deleting an account...\n");
-            // Code to delete an account
+
+            FILE *recordDelete = fopen("accounts.csv", "r");
+            if (recordDelete == NULL)
+            {
+                printf("No accounts found (file missing).\n");
+                break;
+            }
+            char deleteLine[256];
+            int anyDelete = 0;
+            int accountNumberToDelete;
+            int accountFound = 0;
+            printf("Enter account number to delete: ");
+            scanf("%d", &accountNumberToDelete);
+            FILE *tempFile = fopen("temp_accounts.csv", "w");
+            if (tempFile == NULL)
+            {
+                printf("Error creating temporary file.\n");
+                fclose(recordDelete);
+                break;
+            }
+            while (fgets(deleteLine, sizeof(deleteLine), recordDelete))
+            {
+                if (anyDelete == 0 && deleteLine[0] == 'A') // Check if it's the header line
+                {
+                    anyDelete = 1;                       // Mark that we have printed the header
+                    fprintf(tempFile, "%s", deleteLine); // Write header to temp file
+                    continue;                            // Skip printing the header again
+                }
+                int accountNumber;
+                sscanf(deleteLine, "%d", &accountNumber);
+                if (accountNumber != accountNumberToDelete)
+                {
+                    fprintf(tempFile, "%s", deleteLine); // Write to temp file if not deleting
+                } else {
+                    accountFound = 1; // Mark that we found the account to delete
+                }
+            }
+            fclose(recordDelete);
+            fclose(tempFile);
+            remove("accounts.csv");
+            rename("temp_accounts.csv", "accounts.csv");
+            if (accountFound == 0)
+            {
+                printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToDelete);
+            }
+            else
+            {
+                printf("Account deleted successfully.\n");
+                printf("Account with number %d deleted successfully!\n", accountNumberToDelete);
+            }
             break;
         case 6:
             printf("Exiting the program...\n");
