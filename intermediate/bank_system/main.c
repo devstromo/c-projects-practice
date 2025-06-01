@@ -39,7 +39,7 @@ void initBankAccountSequenceFile()
 
 int getLastBankAccountId()
 {
-    FILE *idFile = fopen("last_id.sequence", "r");
+    FILE *idFile = fopen("bank_account.seq", "r");
     int id = 0;
     if (idFile != NULL)
     {
