@@ -340,6 +340,7 @@ int main()
             {
                 printf("\n\nNo accounts found with the name '%s'.\n\n", searchName);
             }
+            fclose(recordAccountView);
             break;
         case 4:
             printf("Updating an account...\n");
