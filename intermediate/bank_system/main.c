@@ -62,6 +62,9 @@ void initLedgerEntrySequenceFile()
     {
         fprintf(idFile, "%d", 0); // Initialize with 0
         fclose(idFile);
+    } else
+    {
+        perror("Error initializing ledger entry sequence file");
     }
 }
 
