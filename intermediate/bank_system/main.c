@@ -31,6 +31,9 @@ void initBankAccountSequenceFile()
     {
         fprintf(idFile, "%d", 0); // Initialize with 0
         fclose(idFile);
+    } else
+    {
+        perror("Error initializing bank account sequence file");
     }
 }
 
