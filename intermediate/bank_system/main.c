@@ -84,6 +84,9 @@ void initLedgerDB()
         file = fopen("ledger.csv", "w");
         fprintf(file, "TransactionId,FromAccount,ToAccount,Amount,Date,Note\n");
         fclose(file);
+    } else
+    {
+        fclose(file);
     }
 }
 
