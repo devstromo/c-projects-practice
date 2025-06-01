@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <errno.h>
 
 typedef struct BankAccount
 {
@@ -52,6 +53,9 @@ void saveLastBankAccountId(int id)
     {
         fprintf(idFile, "%d", id);
         fclose(idFile);
+    } else
+    {
+        perror("Error saving last bank account ID");
     }
 }
 
