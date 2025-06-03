@@ -267,14 +267,13 @@ void updateAccountByNumber()
     }
 
     char updateLine[256];
-    int anyUpdate = 0;    // Detecta cuándo hemos escrito el encabezado
-    int accountFound = 0; // Marca si encontramos el número a actualizar
+    int anyUpdate = 0; 
+    int accountFound = 0;  
 
-    BankAccount updatedAccount; // Aquí guardaremos los datos nuevos
+    BankAccount updatedAccount;
 
     while (fgets(updateLine, sizeof(updateLine), recordView))
     {
-        // 1) Copiar encabezado tal cual a temp
         if (anyUpdate == 0 && updateLine[0] == 'A')
         {
             anyUpdate = 1;
@@ -282,40 +281,48 @@ void updateAccountByNumber()
             continue;
         }
 
-        // 2) Para cada línea de datos, extraemos el accountNumber (antes de la primera coma)
         int accountNumber;
         sscanf(updateLine, "%d", &accountNumber);
+
         if (accountNumber != accountNumberToUpdate)
         {
             fprintf(tempFile, "%s", updateLine);
         }
         else
         {
-            accountFound = 1;
+            if (!accountFound)
+            {
+                accountFound = 1;
 
-            updatedAccount.accountNumber = accountNumber;
+                updatedAccount.accountNumber = accountNumber;
 
-            printf("Enter new account holder name: ");
-            scanf(" %[^\n]", updatedAccount.accountHolder);
+                printf("Enter new account holder name: ");
+                scanf(" %[^\n]", updatedAccount.accountHolder);
 
-            printf("Enter new balance: ");
-            scanf("%lf", &updatedAccount.balance);
+                printf("Enter new balance: ");
+                scanf("%lf", &updatedAccount.balance);
 
-            printf("Enter new account type (e.g., Savings, Checking): ");
-            scanf(" %[^\n]", updatedAccount.accountType);
+                printf("Enter new account type (e.g., Savings, Checking): ");
+                scanf(" %[^\n]", updatedAccount.accountType);
 
-            getCurrentDate(updatedAccount.dateOpened, sizeof(updatedAccount.dateOpened));
-            updatedAccount.lastTransactionDate[0] = '\0';
+                getCurrentDate(updatedAccount.dateOpened, sizeof(updatedAccount.dateOpened));
+                updatedAccount.lastTransactionDate[0] = '\0';
 
-            fprintf(
-                tempFile,
-                "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
-                updatedAccount.accountNumber,
-                updatedAccount.accountHolder,
-                updatedAccount.balance,
-                updatedAccount.accountType,
-                updatedAccount.dateOpened,
-                updatedAccount.lastTransactionDate);
+                fprintf(
+                    tempFile,
+                    "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                    updatedAccount.accountNumber,
+                    updatedAccount.accountHolder,
+                    updatedAccount.balance,
+                    updatedAccount.accountType,
+                    updatedAccount.dateOpened,
+                    updatedAccount.lastTransactionDate
+                );
+            }
+            else
+            {
+                continue;
+            }
         }
     }
 
