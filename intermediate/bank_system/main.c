@@ -121,33 +121,7 @@ void escapeCsvField(char *dest, const char *src)
     *dest = '\0';
 }
 
-void writeBankAccountToCSV(BankAccount *account)
-{
-    FILE *file = fopen("accounts.csv", "a");
-    if (file != NULL)
-    {
-        char accountHolder[100];
-        escapeCsvField(accountHolder, account->accountHolder);
-        char accountType[100];
-        escapeCsvField(accountType, account->accountType);
-        char dateOpened[100];
-        escapeCsvField(dateOpened, account->dateOpened);
-        char lastTransactionDate[100];
-        escapeCsvField(lastTransactionDate, account->lastTransactionDate);
-        int accountNumber = getLastBankAccountId() + 1;
-        saveLastBankAccountId(accountNumber);
-        fprintf(file, "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
-                accountNumber,
-                accountHolder,
-                account->balance,
-                accountType,
-                dateOpened,
-                lastTransactionDate);
-        fclose(file);
-    }
-}
-
-void writeBankAccountToCSVWithNumber(BankAccount *account, int accountNumber)
+void writeBankAccountToCSV(BankAccount *account, int accountNumber)
 {
     FILE *file = fopen("accounts.csv", "a");
     if (file != NULL)
@@ -321,7 +295,7 @@ void updateAccountByNumber()
             scanf(" %[^\n]", updatedAccount.accountType);
             getCurrentDate(updatedAccount.dateOpened, sizeof(updatedAccount.dateOpened));
             updatedAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
-            writeBankAccountToCSVWithNumber(&updatedAccount, accountNumber);
+            writeBankAccountToCSV(&updatedAccount, accountNumber);
         }
     }
     fclose(recordView);
@@ -398,7 +372,9 @@ int main()
             scanf(" %[^\n]", newAccount.accountType);
             getCurrentDate(newAccount.dateOpened, sizeof(newAccount.dateOpened));
             newAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
-            writeBankAccountToCSV(&newAccount);
+            int accountNumber = getLastBankAccountId() + 1;
+            writeBankAccountToCSV(&newAccount, accountNumber);
+            saveLastBankAccountId(accountNumber);
             printf("Account added successfully!\n");
             // Code to add a new account
             break;
