@@ -253,9 +253,11 @@ void updateAccountByNumber()
         printf("No accounts found (file missing).\n");
         return;
     }
+
     printf("Enter account number to update: ");
     int accountNumberToUpdate;
     scanf("%d", &accountNumberToUpdate);
+
     FILE *tempFile = fopen("temp_accounts.csv", "w");
     if (tempFile == NULL)
     {
@@ -263,12 +265,16 @@ void updateAccountByNumber()
         fclose(recordView);
         return;
     }
+
     char updateLine[256];
-    int anyUpdate = 0;
-    int accountFound = 0;
-    BankAccount updatedAccount;
+    int anyUpdate = 0;    // Detecta cuándo hemos escrito el encabezado
+    int accountFound = 0; // Marca si encontramos el número a actualizar
+
+    BankAccount updatedAccount; // Aquí guardaremos los datos nuevos
+
     while (fgets(updateLine, sizeof(updateLine), recordView))
     {
+        // 1) Copiar encabezado tal cual a temp
         if (anyUpdate == 0 && updateLine[0] == 'A')
         {
             anyUpdate = 1;
@@ -276,6 +282,7 @@ void updateAccountByNumber()
             continue;
         }
 
+        // 2) Para cada línea de datos, extraemos el accountNumber (antes de la primera coma)
         int accountNumber;
         sscanf(updateLine, "%d", &accountNumber);
         if (accountNumber != accountNumberToUpdate)
@@ -285,36 +292,55 @@ void updateAccountByNumber()
         else
         {
             accountFound = 1;
+
             updatedAccount.accountNumber = accountNumber;
+
             printf("Enter new account holder name: ");
             scanf(" %[^\n]", updatedAccount.accountHolder);
+
             printf("Enter new balance: ");
             scanf("%lf", &updatedAccount.balance);
+
             printf("Enter new account type (e.g., Savings, Checking): ");
             scanf(" %[^\n]", updatedAccount.accountType);
+
             getCurrentDate(updatedAccount.dateOpened, sizeof(updatedAccount.dateOpened));
-            updatedAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
-            writeBankAccountToCSV(&updatedAccount, accountNumber);
+            updatedAccount.lastTransactionDate[0] = '\0';
+
+            fprintf(
+                tempFile,
+                "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                updatedAccount.accountNumber,
+                updatedAccount.accountHolder,
+                updatedAccount.balance,
+                updatedAccount.accountType,
+                updatedAccount.dateOpened,
+                updatedAccount.lastTransactionDate);
         }
     }
+
     fclose(recordView);
     fclose(tempFile);
+
+    if (!accountFound)
+    {
+        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToUpdate);
+        remove("temp_accounts.csv");
+        return;
+    }
+
     if (remove("accounts.csv") != 0)
     {
         perror("Error al eliminar accounts.csv");
+        return;
     }
     if (rename("temp_accounts.csv", "accounts.csv") != 0)
     {
         perror("Error al renombrar temp_accounts.csv a accounts.csv");
+        return;
     }
-    if (!accountFound)
-    {
-        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToUpdate);
-    }
-    else
-    {
-        printf("Account with number %d updated successfully!\n", accountNumberToUpdate);
-    }
+
+    printf("Account with number %d updated successfully!\n", accountNumberToUpdate);
 }
 
 // MAIN
