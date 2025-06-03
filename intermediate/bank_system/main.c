@@ -31,7 +31,8 @@ void initBankAccountSequenceFile()
     {
         fprintf(idFile, "%d", 0); // Initialize with 0
         fclose(idFile);
-    } else
+    }
+    else
     {
         perror("Error initializing bank account sequence file");
     }
@@ -56,7 +57,8 @@ void saveLastBankAccountId(int id)
     {
         fprintf(idFile, "%d", id);
         fclose(idFile);
-    } else
+    }
+    else
     {
         perror("Error saving last bank account ID");
     }
@@ -69,7 +71,8 @@ void initLedgerEntrySequenceFile()
     {
         fprintf(idFile, "%d", 0); // Initialize with 0
         fclose(idFile);
-    } else
+    }
+    else
     {
         perror("Error initializing ledger entry sequence file");
     }
@@ -83,7 +86,8 @@ void initBankAccountDB()
         file = fopen("accounts.csv", "w");
         fprintf(file, "AccountNumber,AccountHolder,Balance,AccountType,DateOpened,LastTransactionDate\n");
         fclose(file);
-    } else
+    }
+    else
     {
         fclose(file);
     }
@@ -97,7 +101,8 @@ void initLedgerDB()
         file = fopen("ledger.csv", "w");
         fprintf(file, "TransactionId,FromAccount,ToAccount,Amount,Date,Note\n");
         fclose(file);
-    } else
+    }
+    else
     {
         fclose(file);
     }
@@ -244,10 +249,74 @@ void deleteAccountByNumber()
 
 void updateAccountByNumber()
 {
-    // This function is a placeholder for updating an account by number.
-    // The implementation would involve reading the account, modifying it,
-    // and then writing it back to the file.
-    printf("Update account functionality is not yet implemented.\n");
+    FILE *recordView = fopen("accounts.csv", "r");
+    if (recordView == NULL)
+    {
+        printf("No accounts found (file missing).\n");
+        return;
+    }
+    printf("Enter account number to update: ");
+    int accountNumberToUpdate;
+    scanf("%d", &accountNumberToUpdate);
+    FILE *tempFile = fopen("temp_accounts.csv", "w");
+    if (tempFile == NULL)
+    {
+        printf("Error creating temporary file.\n");
+        fclose(recordView);
+        return;
+    }
+    char updateLine[256];
+    int anyUpdate = 0;
+    int accountFound = 0;
+    BankAccount updatedAccount;
+    while (fgets(updateLine, sizeof(updateLine), recordView))
+    {
+        if (anyUpdate == 0 && updateLine[0] == 'A')
+        {
+            anyUpdate = 1;
+            fprintf(tempFile, "%s", updateLine);
+            continue;
+        }
+
+        int accountNumber;
+        sscanf(updateLine, "%d", &accountNumber);
+        if (accountNumber != accountNumberToUpdate)
+        {
+            fprintf(tempFile, "%s", updateLine);
+        }
+        else
+        {
+            accountFound = 1;
+            updatedAccount.accountNumber = accountNumber;
+            printf("Enter new account holder name: ");
+            scanf(" %[^\n]", updatedAccount.accountHolder);
+            printf("Enter new balance: ");
+            scanf("%lf", &updatedAccount.balance);
+            printf("Enter new account type (e.g., Savings, Checking): ");
+            scanf(" %[^\n]", updatedAccount.accountType);
+            getCurrentDate(updatedAccount.dateOpened, sizeof(updatedAccount.dateOpened));
+            updatedAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
+            writeBankAccountToCSV(&updatedAccount);
+        }
+    }
+    fclose(recordView);
+    fclose(tempFile);
+    if (remove("accounts.csv") != 0)
+    {
+        perror("Error al eliminar accounts.csv");
+    }
+    if (rename("temp_accounts.csv", "accounts.csv") != 0)
+    {
+        perror("Error al renombrar temp_accounts.csv a accounts.csv");
+    }
+    if (!accountFound)
+    {
+        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToUpdate);
+    }
+    else
+    {
+        printf("Account with number %d updated successfully!\n", accountNumberToUpdate);
+    }
 }
 
 // MAIN
