@@ -242,6 +242,14 @@ void deleteAccountByNumber()
     }
 }
 
+void updateAccountByNumber()
+{
+    // This function is a placeholder for updating an account by number.
+    // The implementation would involve reading the account, modifying it,
+    // and then writing it back to the file.
+    printf("Update account functionality is not yet implemented.\n");
+}
+
 // MAIN
 int main()
 {
@@ -360,7 +368,7 @@ int main()
             break;
         case 4:
             printf("Updating an account...\n");
-            // Code to update an account
+            updateAccountByNumber();
             break;
         case 5:
             printf("Deleting an account...\n");
