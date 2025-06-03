@@ -139,7 +139,7 @@ void writeBankAccountToCSV(BankAccount *account)
         fprintf(file, "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
                 accountNumber,
                 accountHolder,
-                0.0,
+                account->balance,
                 accountType,
                 dateOpened,
                 lastTransactionDate);
