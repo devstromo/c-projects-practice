@@ -134,7 +134,6 @@ void writeBankAccountToCSV(BankAccount *account, int accountNumber)
         escapeCsvField(dateOpened, account->dateOpened);
         char lastTransactionDate[100];
         escapeCsvField(lastTransactionDate, account->lastTransactionDate);
-        int accountNumber = getLastBankAccountId() + 1;
         fprintf(file, "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
                 accountNumber,
                 accountHolder,
