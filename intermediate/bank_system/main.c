@@ -147,6 +147,31 @@ void writeBankAccountToCSV(BankAccount *account)
     }
 }
 
+void writeBankAccountToCSVWithNumber(BankAccount *account, int accountNumber)
+{
+    FILE *file = fopen("accounts.csv", "a");
+    if (file != NULL)
+    {
+        char accountHolder[100];
+        escapeCsvField(accountHolder, account->accountHolder);
+        char accountType[100];
+        escapeCsvField(accountType, account->accountType);
+        char dateOpened[100];
+        escapeCsvField(dateOpened, account->dateOpened);
+        char lastTransactionDate[100];
+        escapeCsvField(lastTransactionDate, account->lastTransactionDate);
+        int accountNumber = getLastBankAccountId() + 1;
+        fprintf(file, "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                accountNumber,
+                accountHolder,
+                account->balance,
+                accountType,
+                dateOpened,
+                lastTransactionDate);
+        fclose(file);
+    }
+}
+
 void writeLedgerEntryToCSV(LedgerEntry *entry)
 {
     FILE *file = fopen("ledger.csv", "a");
@@ -296,7 +321,7 @@ void updateAccountByNumber()
             scanf(" %[^\n]", updatedAccount.accountType);
             getCurrentDate(updatedAccount.dateOpened, sizeof(updatedAccount.dateOpened));
             updatedAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
-            writeBankAccountToCSV(&updatedAccount);
+            writeBankAccountToCSVWithNumber(&updatedAccount, accountNumber);
         }
     }
     fclose(recordView);
