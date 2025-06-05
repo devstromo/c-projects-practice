@@ -267,8 +267,8 @@ void updateAccountByNumber()
     }
 
     char updateLine[256];
-    int anyUpdate = 0; 
-    int accountFound = 0;  
+    int anyUpdate = 0;
+    int accountFound = 0;
 
     BankAccount updatedAccount;
 
@@ -316,8 +316,104 @@ void updateAccountByNumber()
                     updatedAccount.balance,
                     updatedAccount.accountType,
                     updatedAccount.dateOpened,
-                    updatedAccount.lastTransactionDate
-                );
+                    updatedAccount.lastTransactionDate);
+            }
+            else
+            {
+                continue;
+            }
+        }
+    }
+
+    fclose(recordView);
+    fclose(tempFile);
+
+    if (!accountFound)
+    {
+        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToUpdate);
+        remove("temp_accounts.csv");
+        return;
+    }
+
+    if (remove("accounts.csv") != 0)
+    {
+        perror("Error al eliminar accounts.csv");
+        return;
+    }
+    if (rename("temp_accounts.csv", "accounts.csv") != 0)
+    {
+        perror("Error al renombrar temp_accounts.csv a accounts.csv");
+        return;
+    }
+
+    printf("Account with number %d updated successfully!\n", accountNumberToUpdate);
+}
+
+void withdrawMoney()
+{
+    printf("Withdrawing money...\n");
+
+    FILE *recordView = fopen("accounts.csv", "r");
+    if (recordView == NULL)
+    {
+        printf("No accounts found (file missing).\n");
+        return;
+    }
+
+    printf("Enter account number to withdraw money: ");
+    int accountNumberToUpdate;
+    scanf("%d", &accountNumberToUpdate);
+
+    FILE *tempFile = fopen("temp_accounts.csv", "w");
+    if (tempFile == NULL)
+    {
+        printf("Error creating temporary file.\n");
+        fclose(recordView);
+        return;
+    }
+
+    char updateLine[256];
+    int anyUpdate = 0;
+    int accountFound = 0;
+    double withdrawalAmount;
+
+    BankAccount updatedAccount;
+
+    while (fgets(updateLine, sizeof(updateLine), recordView))
+    {
+        if (anyUpdate == 0 && updateLine[0] == 'A')
+        {
+            anyUpdate = 1;
+            fprintf(tempFile, "%s", updateLine);
+            continue;
+        }
+
+        int accountNumber;
+        sscanf(updateLine, "%d", &accountNumber);
+
+        if (accountNumber != accountNumberToUpdate)
+        {
+            fprintf(tempFile, "%s", updateLine);
+        }
+        else
+        {
+            if (!accountFound)
+            {
+                accountFound = 1;
+
+                updatedAccount.accountNumber = accountNumber;
+                printf("Enter amount to withdraw: ");
+                scanf("%lf", &withdrawalAmount);
+
+                                // fprintf(
+                //     tempFile,
+                //     "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                //     updatedAccount.accountNumber,
+                //     updatedAccount.accountHolder,
+                //     updatedAccount.balance,
+                //     updatedAccount.accountType,
+                //     updatedAccount.dateOpened,
+                //     updatedAccount.lastTransactionDate);
             }
             else
             {
@@ -482,8 +578,7 @@ int main()
             deleteAccountByNumber();
             break;
         case 6:
-            printf("Withdrawing money...\n");
-            // Code to withdraw money
+            withdrawMoney();
             break;
         case 7:
             printf("Depositing money...\n");
@@ -501,7 +596,7 @@ int main()
             printf("Viewing account balance...\n");
             // Code to view account balance
             // This could be implemented by reading the account details from the CSV file
-            break;        
+            break;
         case 11:
             printf("Exiting the program...\n");
             break;
