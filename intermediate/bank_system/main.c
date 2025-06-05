@@ -404,16 +404,23 @@ void withdrawMoney()
                 searchedAccount.accountNumber = accountNumber;
                 printf("Enter amount to withdraw: ");
                 scanf("%lf", &withdrawalAmount);
-
-                                // fprintf(
-                //     tempFile,
-                //     "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
-                //     updatedAccount.accountNumber,
-                //     updatedAccount.accountHolder,
-                //     updatedAccount.balance,
-                //     updatedAccount.accountType,
-                //     updatedAccount.dateOpened,
-                //     updatedAccount.lastTransactionDate);
+                if (searchedAccount.balance < withdrawalAmount)
+                {
+                    printf("Insufficient balance for withdrawal.\n");
+                    continue;
+                }
+                searchedAccount.balance -= withdrawalAmount;
+                getCurrentDate(searchedAccount.lastTransactionDate, sizeof(searchedAccount.lastTransactionDate));
+                
+                fprintf(
+                    tempFile,
+                    "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                    searchedAccount.accountNumber,
+                    searchedAccount.accountHolder,
+                    searchedAccount.balance,
+                    searchedAccount.accountType,
+                    searchedAccount.dateOpened,
+                    searchedAccount.lastTransactionDate);
             }
             else
             {
