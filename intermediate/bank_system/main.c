@@ -383,8 +383,13 @@ int main()
         printf("3. Search for an account\n");
         printf("4. Update an account\n");
         printf("5. Delete an account\n");
-        printf("6. Exit\n");
-        printf("Please select an option (1-6): ");
+        printf("6. Withdraw money\n");
+        printf("7. Deposit money\n");
+        printf("8. Transfer money\n");
+        printf("9. View transaction history\n");
+        printf("10. View account balance\n");
+        printf("11. Exit\n");
+        printf("Please select an option (1-11): ");
         scanf("%d", &option);
         if (option < 1 || option > 6)
         {
@@ -477,12 +482,33 @@ int main()
             deleteAccountByNumber();
             break;
         case 6:
+            printf("Withdrawing money...\n");
+            // Code to withdraw money
+            break;
+        case 7:
+            printf("Depositing money...\n");
+            // Code to deposit money
+            break;
+        case 8:
+            printf("Transferring money...\n");
+            // Code to transfer money
+            break;
+        case 9:
+            printf("Viewing transaction history...\n");
+            // Code to view transaction history
+            break;
+        case 10:
+            printf("Viewing account balance...\n");
+            // Code to view account balance
+            // This could be implemented by reading the account details from the CSV file
+            break;        
+        case 11:
             printf("Exiting the program...\n");
             break;
         default:
             printf("Invalid option. Please select a number between 1 and 6.\n");
         }
-    } while (option != 6);
+    } while (option != 11);
 
     return 0;
 }
