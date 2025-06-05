@@ -407,6 +407,7 @@ void withdrawMoney()
                 if (searchedAccount.balance < withdrawalAmount)
                 {
                     printf("Insufficient balance for withdrawal.\n");
+                    fprintf(tempFile, "%s", updateLine);
                     continue;
                 }
                 searchedAccount.balance -= withdrawalAmount;
