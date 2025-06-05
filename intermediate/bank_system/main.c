@@ -361,8 +361,8 @@ void withdrawMoney()
     }
 
     printf("Enter account number to withdraw money: ");
-    int accountNumberToUpdate;
-    scanf("%d", &accountNumberToUpdate);
+    int accountNumberToWithdrawMoney;
+    scanf("%d", &accountNumberToWithdrawMoney);
 
     FILE *tempFile = fopen("temp_accounts.csv", "w");
     if (tempFile == NULL)
@@ -377,7 +377,7 @@ void withdrawMoney()
     int accountFound = 0;
     double withdrawalAmount;
 
-    BankAccount updatedAccount;
+    BankAccount searchedAccount;
 
     while (fgets(updateLine, sizeof(updateLine), recordView))
     {
@@ -391,7 +391,7 @@ void withdrawMoney()
         int accountNumber;
         sscanf(updateLine, "%d", &accountNumber);
 
-        if (accountNumber != accountNumberToUpdate)
+        if (accountNumber != accountNumberToWithdrawMoney)
         {
             fprintf(tempFile, "%s", updateLine);
         }
@@ -401,7 +401,7 @@ void withdrawMoney()
             {
                 accountFound = 1;
 
-                updatedAccount.accountNumber = accountNumber;
+                searchedAccount.accountNumber = accountNumber;
                 printf("Enter amount to withdraw: ");
                 scanf("%lf", &withdrawalAmount);
 
@@ -427,7 +427,7 @@ void withdrawMoney()
 
     if (!accountFound)
     {
-        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToUpdate);
+        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToWithdrawMoney);
         remove("temp_accounts.csv");
         return;
     }
@@ -443,7 +443,7 @@ void withdrawMoney()
         return;
     }
 
-    printf("Account with number %d updated successfully!\n", accountNumberToUpdate);
+    printf("Account with number %d updated successfully!\n", accountNumberToWithdrawMoney);
 }
 
 // MAIN
