@@ -471,7 +471,7 @@ void withdrawMoney()
 depositMoney()
 {
     printf("Depositing money...\n");
-    
+
     FILE *recordView = fopen("accounts.csv", "r");
     if (recordView == NULL)
     {
@@ -479,7 +479,7 @@ depositMoney()
         return;
     }
 
-    printf("Enter account number to withdraw money: ");
+    printf("Enter account number to deposit money: ");
     int accountNumberToDepositMoney;
     scanf("%d", &accountNumberToDepositMoney);
 
@@ -489,6 +489,21 @@ depositMoney()
         printf("Error creating temporary file.\n");
         fclose(recordView);
         return;
+    }
+
+    char updateLine[256];
+    int anyUpdate = 0;
+    int accountFound = 0;
+    double depositAmount;
+    BankAccount searchedAccount;
+    while (fgets(updateLine, sizeof(updateLine), recordView))
+    {
+        if (anyUpdate == 0 && updateLine[0] == 'A')
+        {
+            anyUpdate = 1;
+            fprintf(tempFile, "%s", updateLine);
+            continue;
+        }
     }
 }
 
