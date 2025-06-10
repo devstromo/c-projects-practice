@@ -517,11 +517,17 @@ void depositMoney()
             {
                 accountFound = 1;
 
-                searchedAccount.accountNumber = accountNumber;
+                sscanf(updateLine, "%d,\"%49[^\"]\",%lf,\"%19[^\"]\",\"%10[^\"]\",\"%10[^\"]\"",
+                       &searchedAccount.accountNumber,
+                       searchedAccount.accountHolder,
+                       &searchedAccount.balance,
+                       searchedAccount.accountType,
+                       searchedAccount.dateOpened,
+                       searchedAccount.lastTransactionDate);
+
                 printf("Enter amount to deposit: ");
                 scanf("%lf", &depositAmount);
                 searchedAccount.balance += depositAmount;
-                printf("Account holder name: ", searchedAccount.accountHolder);
                 getCurrentDate(searchedAccount.lastTransactionDate, sizeof(searchedAccount.lastTransactionDate));
 
                 fprintf(
