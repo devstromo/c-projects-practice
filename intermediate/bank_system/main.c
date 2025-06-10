@@ -521,6 +521,7 @@ void depositMoney()
                 printf("Enter amount to deposit: ");
                 scanf("%lf", &depositAmount);
                 searchedAccount.balance += depositAmount;
+                printf("Account holder name: ", searchedAccount.accountHolder);
                 getCurrentDate(searchedAccount.lastTransactionDate, sizeof(searchedAccount.lastTransactionDate));
 
                 fprintf(
