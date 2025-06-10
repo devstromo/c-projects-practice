@@ -468,7 +468,7 @@ void withdrawMoney()
     printf("Account with number %d updated successfully!\n", accountNumberToWithdrawMoney);
 }
 
-depositMoney()
+void depositMoney()
 {
     printf("Depositing money...\n");
 
@@ -504,7 +504,60 @@ depositMoney()
             fprintf(tempFile, "%s", updateLine);
             continue;
         }
+        int accountNumber;
+        sscanf(updateLine, "%d", &accountNumber);
+
+        if (accountNumber != accountNumberToDepositMoney)
+        {
+            fprintf(tempFile, "%s", updateLine);
+        }
+        else
+        {
+            if (!accountFound)
+            {
+                accountFound = 1;
+
+                searchedAccount.accountNumber = accountNumber;
+                printf("Enter amount to deposit: ");
+                scanf("%lf", &depositAmount);
+                searchedAccount.balance += depositAmount;
+                getCurrentDate(searchedAccount.lastTransactionDate, sizeof(searchedAccount.lastTransactionDate));
+
+                fprintf(
+                    tempFile,
+                    "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                    searchedAccount.accountNumber,
+                    searchedAccount.accountHolder,
+                    searchedAccount.balance,
+                    searchedAccount.accountType,
+                    searchedAccount.dateOpened,
+                    searchedAccount.lastTransactionDate);
+            }
+            else
+            {
+                continue;
+            }
+        }
     }
+    fclose(recordView);
+    fclose(tempFile);
+    if (!accountFound)
+    {
+        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToDepositMoney);
+        remove("temp_accounts.csv");
+        return;
+    }
+    if (remove("accounts.csv") != 0)
+    {
+        perror("Error al eliminar accounts.csv");
+        return;
+    }
+    if (rename("temp_accounts.csv", "accounts.csv") != 0)
+    {
+        perror("Error al renombrar temp_accounts.csv a accounts.csv");
+        return;
+    }
+    printf("Account with number %d updated successfully!\n", accountNumberToDepositMoney);
 }
 
 // MAIN
@@ -548,7 +601,7 @@ int main()
         printf("11. Exit\n");
         printf("Please select an option (1-11): ");
         scanf("%d", &option);
-        if (option < 1 || option > 6)
+        if (option < 1 || option > 11)
         {
             printf("Invalid option. Please select a number between 1 and 6.\n");
             return 1;
@@ -661,7 +714,7 @@ int main()
             printf("Exiting the program...\n");
             break;
         default:
-            printf("Invalid option. Please select a number between 1 and 6.\n");
+            printf("Invalid option. Please select a number between 1 and 11.\n");
         }
     } while (option != 11);
 
