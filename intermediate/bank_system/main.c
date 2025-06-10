@@ -375,6 +375,7 @@ void withdrawMoney()
     char updateLine[256];
     int anyUpdate = 0;
     int accountFound = 0;
+    int accountHasNoBalance = 0;
     double withdrawalAmount;
 
     BankAccount searchedAccount;
@@ -406,6 +407,7 @@ void withdrawMoney()
                 {
                     printf("Account with number %d has no balance.\n", accountNumberToWithdrawMoney);
                     fprintf(tempFile, "%s", updateLine);
+                    accountHasNoBalance = 1;
                     continue;
                 }
                 printf("Enter amount to withdraw: ");
@@ -457,6 +459,12 @@ void withdrawMoney()
         return;
     }
 
+    if (accountHasNoBalance)
+    {
+        printf("Account with number %d has no balance. Withdrawal not processed.\n", accountNumberToWithdrawMoney);
+        return;
+    }
+    
     printf("Account with number %d updated successfully!\n", accountNumberToWithdrawMoney);
 }
 
