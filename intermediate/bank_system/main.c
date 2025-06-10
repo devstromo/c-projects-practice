@@ -402,6 +402,12 @@ void withdrawMoney()
                 accountFound = 1;
 
                 searchedAccount.accountNumber = accountNumber;
+                if (searchedAccount.balance == 0.0)
+                {
+                    printf("Account with number %d has no balance.\n", accountNumberToWithdrawMoney);
+                    fprintf(tempFile, "%s", updateLine);
+                    continue;
+                }
                 printf("Enter amount to withdraw: ");
                 scanf("%lf", &withdrawalAmount);
                 if (searchedAccount.balance < withdrawalAmount)
