@@ -420,7 +420,7 @@ void withdrawMoney()
                 }
                 searchedAccount.balance -= withdrawalAmount;
                 getCurrentDate(searchedAccount.lastTransactionDate, sizeof(searchedAccount.lastTransactionDate));
-                
+
                 fprintf(
                     tempFile,
                     "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
@@ -464,8 +464,32 @@ void withdrawMoney()
         printf("Account with number %d has no balance. Withdrawal not processed.\n", accountNumberToWithdrawMoney);
         return;
     }
-    
+
     printf("Account with number %d updated successfully!\n", accountNumberToWithdrawMoney);
+}
+
+depositMoney()
+{
+    printf("Depositing money...\n");
+    
+    FILE *recordView = fopen("accounts.csv", "r");
+    if (recordView == NULL)
+    {
+        printf("No accounts found (file missing).\n");
+        return;
+    }
+
+    printf("Enter account number to withdraw money: ");
+    int accountNumberToDepositMoney;
+    scanf("%d", &accountNumberToDepositMoney);
+
+    FILE *tempFile = fopen("temp_accounts.csv", "w");
+    if (tempFile == NULL)
+    {
+        printf("Error creating temporary file.\n");
+        fclose(recordView);
+        return;
+    }
 }
 
 // MAIN
@@ -603,8 +627,7 @@ int main()
             withdrawMoney();
             break;
         case 7:
-            printf("Depositing money...\n");
-            // Code to deposit money
+            depositMoney();
             break;
         case 8:
             printf("Transferring money...\n");
