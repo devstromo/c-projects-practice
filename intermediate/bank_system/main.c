@@ -78,6 +78,32 @@ void initLedgerEntrySequenceFile()
     }
 }
 
+int getLastLedgerEntryId()
+{
+    FILE *idFile = fopen("ledger_entry.seq", "r");
+    int id = 0;
+    if (idFile != NULL)
+    {
+        fscanf(idFile, "%d", &id);
+        fclose(idFile);
+    }
+    return id;
+}
+
+void saveLastLedgerEntryId(int id)
+{
+    FILE *idFile = fopen("ledger_entry.seq", "w");
+    if (idFile != NULL)
+    {
+        fprintf(idFile, "%d", id);
+        fclose(idFile);
+    }
+    else
+    {
+        perror("Error saving last ledger entry ID");
+    }
+}
+
 void initBankAccountDB()
 {
     FILE *file = fopen("accounts.csv", "r");
