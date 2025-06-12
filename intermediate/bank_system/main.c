@@ -570,151 +570,132 @@ void depositMoney()
 void transferringMoney()
 {
     printf("Transferring money...\n");
-    FILE *recordView = fopen("accounts.csv", "r");
-    if (recordView == NULL)
+
+    int sourceAccountNumber, destinationAccountNumber;
+    double transferAmount;
+
+    printf("Enter source account number: ");
+    scanf("%d", &sourceAccountNumber);
+    printf("Enter destination account number: ");
+    scanf("%d", &destinationAccountNumber);
+    printf("Enter amount to transfer: ");
+    scanf("%lf", &transferAmount);
+
+    FILE *original = fopen("accounts.csv", "r");
+    if (!original)
     {
         printf("No accounts found (file missing).\n");
         return;
     }
 
-    printf("Enter account number to deposit money: ");
-    int accountNumberToDepositMoney;
-    scanf("%d", &accountNumberToDepositMoney);
+    BankAccount source, destination;
+    int foundSource = 0, foundDestination = 0;
+    char line[256];
 
-    FILE *tempFile = fopen("temp_accounts.csv", "w");
-    if (tempFile == NULL)
+    // Read all accounts first to find both accounts
+    while (fgets(line, sizeof(line), original))
     {
-        printf("Error creating temporary file.\n");
-        fclose(recordView);
+        BankAccount temp;
+        int accountNumber;
+        sscanf(line, "%d,\"%49[^\"]\",%lf,\"%19[^\"]\",\"%10[^\"]\",\"%10[^\"]\"",
+               &temp.accountNumber,
+               temp.accountHolder,
+               &temp.balance,
+               temp.accountType,
+               temp.dateOpened,
+               temp.lastTransactionDate);
+
+        if (temp.accountNumber == sourceAccountNumber)
+        {
+            source = temp;
+            foundSource = 1;
+        }
+        else if (temp.accountNumber == destinationAccountNumber)
+        {
+            destination = temp;
+            foundDestination = 1;
+        }
+    }
+    fclose(original);
+
+    if (!foundSource)
+    {
+        printf("Source account not found.\n");
         return;
     }
-    // Variables for the transfer
-    // Source account
-    // Destination account
-    int sourceAccountNumber, destinationAccountNumber;
-    double transferAmount;
-    BankAccount sourceAccount, destinationAccount;
-    int sourceAccountFound = 0, destinationAccountFound = 0;
-    char updateLine[256];
-    int anyUpdate = 0;
-    while (fgets(updateLine, sizeof(updateLine), recordView))
+    if (!foundDestination)
     {
-        if (anyUpdate == 0 && updateLine[0] == 'A')
-        {
-            anyUpdate = 1;
-            fprintf(tempFile, "%s", updateLine);
-            continue;
-        }
-        int accountNumber;
-        sscanf(updateLine, "%d,\"%49[^\"]\",%lf,\"%19[^\"]\",\"%10[^\"]\",\"%10[^\"]\"",
-               &accountNumber,
-               sourceAccount.accountHolder,
-               &sourceAccount.balance,
-               sourceAccount.accountType,
-               sourceAccount.dateOpened,
-               sourceAccount.lastTransactionDate);
+        printf("Destination account not found.\n");
+        return;
+    }
+    if (source.balance < transferAmount)
+    {
+        printf("Insufficient funds.\n");
+        return;
+    }
 
-        if (accountNumber == accountNumberToDepositMoney)
+    // Update balances
+    source.balance -= transferAmount;
+    destination.balance += transferAmount;
+    getCurrentDate(source.lastTransactionDate, sizeof(source.lastTransactionDate));
+    getCurrentDate(destination.lastTransactionDate, sizeof(destination.lastTransactionDate));
+
+    // Now write all accounts back, replacing updated source and destination
+    original = fopen("accounts.csv", "r");
+    FILE *temp = fopen("temp_accounts.csv", "w");
+    if (!original || !temp)
+    {
+        printf("Error accessing files.\n");
+        if (original) fclose(original);
+        if (temp) fclose(temp);
+        return;
+    }
+
+    while (fgets(line, sizeof(line), original))
+    {
+        BankAccount tempAcc;
+        int accountNumber;
+        sscanf(line, "%d,\"%49[^\"]\",%lf,\"%19[^\"]\",\"%10[^\"]\",\"%10[^\"]\"",
+               &tempAcc.accountNumber,
+               tempAcc.accountHolder,
+               &tempAcc.balance,
+               tempAcc.accountType,
+               tempAcc.dateOpened,
+               tempAcc.lastTransactionDate);
+
+        if (tempAcc.accountNumber == sourceAccountNumber)
         {
-            sourceAccountFound = 1;
-            sourceAccount.accountNumber = accountNumberToDepositMoney;
-            printf("Enter amount to transfer: ");
-            scanf("%lf", &transferAmount);
-            if (sourceAccount.balance < transferAmount)
-            {
-                printf("Insufficient balance for transfer.\n");
-                fprintf(tempFile, "%s", updateLine);
-                continue;
-            }
-            sourceAccount.balance -= transferAmount;
-            getCurrentDate(sourceAccount.lastTransactionDate, sizeof(sourceAccount.lastTransactionDate));
+            fprintf(temp, "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                    source.accountNumber,
+                    source.accountHolder,
+                    source.balance,
+                    source.accountType,
+                    source.dateOpened,
+                    source.lastTransactionDate);
+        }
+        else if (tempAcc.accountNumber == destinationAccountNumber)
+        {
+            fprintf(temp, "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
+                    destination.accountNumber,
+                    destination.accountHolder,
+                    destination.balance,
+                    destination.accountType,
+                    destination.dateOpened,
+                    destination.lastTransactionDate);
         }
         else
         {
-            fprintf(tempFile, "%s", updateLine);
+            fputs(line, temp);
         }
-    }
-    fclose(recordView);
-    if (!sourceAccountFound)
-    {
-        printf("\n\nNo accounts found with the number '%d'.\n\n", accountNumberToDepositMoney);
-        remove("temp_accounts.csv");
-        return;
-    }
-    // Now we need to find the destination account
-    printf("Enter destination account number: ");
-    scanf("%d", &destinationAccountNumber);
-    recordView = fopen("accounts.csv", "r");
-    if (recordView == NULL)
-    {
-        printf("No accounts found (file missing).\n");
-        fclose(tempFile);
-        return;
-    }
-    anyUpdate = 0; // Reset for the next read
-    while (fgets(updateLine, sizeof(updateLine), recordView))
-    {
-        if (anyUpdate == 0 && updateLine[0] == 'A')
-        {
-            anyUpdate = 1;
-            continue; // Skip header line
-        }
-        int accountNumber;
-        sscanf(updateLine, "%d,\"%49[^\"]\",%lf,\"%19[^\"]\",\"%10[^\"]\",\"%10[^\"]\"",
-               &accountNumber,
-               destinationAccount.accountHolder,
-               &destinationAccount.balance,
-               destinationAccount.accountType,
-               destinationAccount.dateOpened,
-               destinationAccount.lastTransactionDate);
-
-        if (accountNumber == destinationAccountNumber)
-        {
-            destinationAccountFound = 1;
-            destinationAccount.accountNumber = destinationAccountNumber;
-            destinationAccount.balance += transferAmount;
-            getCurrentDate(destinationAccount.lastTransactionDate, sizeof(destinationAccount.lastTransactionDate));
-        }
-    }
-    fclose(recordView);
-    if (!destinationAccountFound)
-    {
-        printf("\n\nNo accounts found with the number '%d'.\n\n", destinationAccountNumber);
-        remove("temp_accounts.csv");
-        return;
-    }
-    // Write the updated source account back to the temp file
-    fprintf(
-        tempFile,
-        "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
-        sourceAccount.accountNumber,
-        sourceAccount.accountHolder,
-        sourceAccount.balance,
-        sourceAccount.accountType,
-        sourceAccount.dateOpened,
-        sourceAccount.lastTransactionDate);
-    // Write the updated destination account back to the temp file
-    fprintf(
-        tempFile,
-        "%d,\"%s\",%.2f,\"%s\",\"%s\",\"%s\"\n",
-        destinationAccount.accountNumber,
-        destinationAccount.accountHolder,
-        destinationAccount.balance,
-        destinationAccount.accountType,
-        destinationAccount.dateOpened,
-        destinationAccount.lastTransactionDate);
-    fclose(tempFile);
-    if (remove("accounts.csv") != 0)
-    {
-        perror("Error al eliminar accounts.csv");
-        return;
-    }
-    if (rename("temp_accounts.csv", "accounts.csv") != 0)
-    {
-        perror("Error al renombrar temp_accounts.csv a accounts.csv");
-        return;
     }
 
+    fclose(original);
+    fclose(temp);
+
+    remove("accounts.csv");
+    rename("temp_accounts.csv", "accounts.csv");
+
+    printf("Transfer completed successfully.\n");
 }
 
 // MAIN
