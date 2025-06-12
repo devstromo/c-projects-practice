@@ -567,6 +567,11 @@ void depositMoney()
     printf("Account with number %d updated successfully!\n", accountNumberToDepositMoney);
 }
 
+void transferringMoney()
+{
+    printf("Transferring money...\n");
+}
+
 // MAIN
 int main()
 {
@@ -705,8 +710,7 @@ int main()
             depositMoney();
             break;
         case 8:
-            printf("Transferring money...\n");
-            // Code to transfer money
+            transferringMoney();
             break;
         case 9:
             printf("Viewing transaction history...\n");
