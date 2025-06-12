@@ -722,6 +722,18 @@ void transferringMoney()
     rename("temp_accounts.csv", "accounts.csv");
 
     printf("Transfer completed successfully.\n");
+
+    // Log the transaction in the ledger
+    LedgerEntry entry;
+    entry.transactionId = getLastLedgerEntryId() + 1;
+    entry.fromAccount = sourceAccountNumber;
+    entry.toAccount = destinationAccountNumber;
+    entry.amount = transferAmount;
+    getCurrentDate(entry.date, sizeof(entry.date));
+    snprintf(entry.note, sizeof(entry.note), "Transfer from %d to %d", sourceAccountNumber, destinationAccountNumber);
+    writeLedgerEntryToCSV(&entry);
+    saveLastLedgerEntryId(entry.transactionId);
+    printf("Transaction logged successfully with ID %d.\n", entry.transactionId);
 }
 
 // MAIN
