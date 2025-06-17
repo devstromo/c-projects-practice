@@ -196,6 +196,24 @@ void getCurrentDate(char *buffer, size_t size)
     strftime(buffer, size, "%Y-%m-%d", tm_info);
 }
 
+void addNewAccount()
+{
+    printf("Adding a new account...\n");
+    BankAccount newAccount;
+    printf("Enter account holder name: ");
+    scanf(" %[^\n]", newAccount.accountHolder);
+    printf("Enter balance: ");
+    scanf("%lf", &newAccount.balance);
+    printf("Enter account type (e.g., Savings, Checking): ");
+    scanf(" %[^\n]", newAccount.accountType);
+    getCurrentDate(newAccount.dateOpened, sizeof(newAccount.dateOpened));
+    newAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
+    int accountNumber = getLastBankAccountId() + 1;
+    writeBankAccountToCSV(&newAccount, accountNumber);
+    saveLastBankAccountId(accountNumber);
+    printf("Account added successfully!\n");
+}
+
 void deleteAccountByNumber()
 {
     FILE *recordDelete = fopen("accounts.csv", "r");
@@ -672,8 +690,10 @@ void transferringMoney()
     if (!original || !temp)
     {
         printf("Error accessing files.\n");
-        if (original) fclose(original);
-        if (temp) fclose(temp);
+        if (original)
+            fclose(original);
+        if (temp)
+            fclose(temp);
         return;
     }
 
@@ -815,21 +835,7 @@ int main()
         switch (option)
         {
         case 1:
-            printf("Adding a new account...\n");
-            BankAccount newAccount;
-            printf("Enter account holder name: ");
-            scanf(" %[^\n]", newAccount.accountHolder);
-            printf("Enter balance: ");
-            scanf("%lf", &newAccount.balance);
-            printf("Enter account type (e.g., Savings, Checking): ");
-            scanf(" %[^\n]", newAccount.accountType);
-            getCurrentDate(newAccount.dateOpened, sizeof(newAccount.dateOpened));
-            newAccount.lastTransactionDate[0] = '\0'; // Initialize to empty string
-            int accountNumber = getLastBankAccountId() + 1;
-            writeBankAccountToCSV(&newAccount, accountNumber);
-            saveLastBankAccountId(accountNumber);
-            printf("Account added successfully!\n");
-            // Code to add a new account
+            addNewAccount();
             break;
         case 2:
             printf("Viewing all accounts...\n");
