@@ -214,6 +214,34 @@ void addNewAccount()
     printf("Account added successfully!\n");
 }
 
+void viewAllAccounts()
+{
+    printf("Viewing all accounts...\n");
+    FILE *recordView = fopen("accounts.csv", "r");
+    if (recordView == NULL)
+    {
+        printf("No accounts found (file missing).\n");
+        return;
+    }
+    char line[256];
+    int any = 0;
+    while (fgets(line, sizeof(line), recordView))
+    {
+        if (any == 0 && line[0] == 'A') // Check if it's the header line
+        {
+            any = 1;  // Mark that we have printed the header
+            continue; // Skip printing the header again
+        }
+        printf("%s", line);
+        any++;
+    }
+    if (any == 1)
+    {
+        printf("\n\nNo accounts found.\n\n");
+    }
+    fclose(recordView);
+}
+
 void deleteAccountByNumber()
 {
     FILE *recordDelete = fopen("accounts.csv", "r");
@@ -838,30 +866,7 @@ int main()
             addNewAccount();
             break;
         case 2:
-            printf("Viewing all accounts...\n");
-            FILE *recordView = fopen("accounts.csv", "r");
-            if (recordView == NULL)
-            {
-                printf("No accounts found (file missing).\n");
-                break;
-            }
-            char line[256];
-            int any = 0;
-            while (fgets(line, sizeof(line), recordView))
-            {
-                if (any == 0 && line[0] == 'A') // Check if it's the header line
-                {
-                    any = 1;  // Mark that we have printed the header
-                    continue; // Skip printing the header again
-                }
-                printf("%s", line);
-                any++;
-            }
-            if (any == 1)
-            {
-                printf("\n\nNo accounts found.\n\n");
-            }
-            fclose(recordView);
+            viewAllAccounts();
             break;
         case 3:
             printf("Searching for an account...\n");
