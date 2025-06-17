@@ -242,6 +242,40 @@ void viewAllAccounts()
     fclose(recordView);
 }
 
+void searchForAccount()
+{
+    printf("Searching for an account...\n");
+    FILE *recordAccountView = fopen("accounts.csv", "r");
+    if (recordAccountView == NULL)
+    {
+        printf("No accounts found (file missing).\n");
+        return;
+    }
+    char accountLine[256];
+    int anyAccount = 0;
+    char searchName[50];
+    printf("Enter account holder name to search: ");
+    scanf(" %[^\n]", searchName);
+    while (fgets(accountLine, sizeof(accountLine), recordAccountView))
+    {
+        if (anyAccount == 0 && accountLine[0] == 'A')
+        {
+            anyAccount = 1;
+            continue;
+        }
+        if (strstr(accountLine, searchName) != NULL)
+        {
+            printf("%s", accountLine);
+            anyAccount++;
+        }
+    }
+    if (anyAccount == 1)
+    {
+        printf("\n\nNo accounts found with the name '%s'.\n\n", searchName);
+    }
+    fclose(recordAccountView);
+}
+
 void deleteAccountByNumber()
 {
     FILE *recordDelete = fopen("accounts.csv", "r");
@@ -869,36 +903,7 @@ int main()
             viewAllAccounts();
             break;
         case 3:
-            printf("Searching for an account...\n");
-            FILE *recordAccountView = fopen("accounts.csv", "r");
-            if (recordAccountView == NULL)
-            {
-                printf("No accounts found (file missing).\n");
-                break;
-            }
-            char accountLine[256];
-            int anyAccount = 0;
-            char searchName[50];
-            printf("Enter account holder name to search: ");
-            scanf(" %[^\n]", searchName);
-            while (fgets(accountLine, sizeof(accountLine), recordAccountView))
-            {
-                if (anyAccount == 0 && accountLine[0] == 'A') // Check if it's the header line
-                {
-                    anyAccount = 1; // Mark that we have printed the header
-                    continue;       // Skip printing the header again
-                }
-                if (strstr(accountLine, searchName) != NULL)
-                {
-                    printf("%s", accountLine);
-                    anyAccount++;
-                }
-            }
-            if (anyAccount == 1)
-            {
-                printf("\n\nNo accounts found with the name '%s'.\n\n", searchName);
-            }
-            fclose(recordAccountView);
+            searchForAccount();
             break;
         case 4:
             printf("Updating an account...\n");
