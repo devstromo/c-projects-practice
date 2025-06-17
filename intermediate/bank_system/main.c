@@ -793,7 +793,7 @@ int main()
 
     do
     {
-        printf("Welcome to the Bank Account Management System!\n");
+        printf("\n\nWelcome to the Bank Account Management System!\n\n");
         printf("1. Add a new account\n");
         printf("2. View all accounts\n");
         printf("3. Search for an account\n");
