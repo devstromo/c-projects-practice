@@ -736,6 +736,36 @@ void transferringMoney()
     printf("Transaction logged successfully with ID %d.\n", entry.transactionId);
 }
 
+void viewTransactionHistory()
+{
+    printf("Viewing transaction history...\n");
+
+    FILE *ledgerFile = fopen("ledger.csv", "r");
+    if (ledgerFile == NULL)
+    {
+        printf("No transaction history found (file missing).\n");
+        return;
+    }
+
+    char line[256];
+    int any = 0;
+    while (fgets(line, sizeof(line), ledgerFile))
+    {
+        if (any == 0 && line[0] == 'T')
+        {
+            any = 1;
+            continue;
+        }
+        printf("%s", line);
+        any++;
+    }
+    if (any == 1)
+    {
+        printf("\n\nNo transactions found.\n\n");
+    }
+    fclose(ledgerFile);
+}
+
 // MAIN
 int main()
 {
@@ -877,8 +907,7 @@ int main()
             transferringMoney();
             break;
         case 9:
-            printf("Viewing transaction history...\n");
-            // Code to view transaction history
+            viewTransactionHistory();
             break;
         case 10:
             printf("Viewing account balance...\n");
