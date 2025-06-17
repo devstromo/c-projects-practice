@@ -852,7 +852,6 @@ void viewTransactionHistory()
 int main()
 {
 
-    // Initialize the sequence files if they don't exist
     FILE *idFile = fopen("bank_account.seq", "r");
     if (idFile == NULL)
     {
@@ -860,7 +859,6 @@ int main()
         idFile = fopen("bank_account.seq", "r");
     }
 
-    // Initialize the database file if it doesn't exist
     initBankAccountDB();
     FILE *ledgerFile = fopen("ledger_entry.seq", "r");
     if (ledgerFile == NULL)
@@ -868,7 +866,6 @@ int main()
         initLedgerEntrySequenceFile();
         ledgerFile = fopen("ledger_entry.seq", "r");
     }
-    // Initialize the ledger database file if it doesn't exist
     initLedgerDB();
 
     int option;
