@@ -848,6 +848,11 @@ void viewTransactionHistory()
     fclose(ledgerFile);
 }
 
+void viewAccountBalance()
+{
+    printf("Viewing account balance...\n");
+}
+
 // MAIN
 int main()
 {
@@ -923,9 +928,7 @@ int main()
             viewTransactionHistory();
             break;
         case 10:
-            printf("Viewing account balance...\n");
-            // Code to view account balance
-            // This could be implemented by reading the account details from the CSV file
+            viewAccountBalance();
             break;
         case 11:
             printf("Exiting the program...\n");
