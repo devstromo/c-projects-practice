@@ -851,6 +851,35 @@ void viewTransactionHistory()
 void viewAccountBalance()
 {
     printf("Viewing account balance...\n");
+    FILE *recordAccountView = fopen("accounts.csv", "r");
+    if (recordAccountView == NULL)
+    {
+        printf("No accounts found (file missing).\n");
+        return;
+    }
+    char accountLine[256];
+    int anyAccount = 0;
+    char searchName[50];
+    printf("Enter account holder name to get balance: ");
+    scanf(" %[^\n]", searchName);
+    while (fgets(accountLine, sizeof(accountLine), recordAccountView))
+    {
+        if (anyAccount == 0 && accountLine[0] == 'A')
+        {
+            anyAccount = 1;
+            continue;
+        }
+        if (strstr(accountLine, searchName) != NULL)
+        {
+            printf("%s", accountLine);
+            anyAccount++;
+        }
+    }
+    if (anyAccount == 1)
+    {
+        printf("\n\nNo accounts found with the name '%s'.\n\n", searchName);
+    }
+    fclose(recordAccountView);
 }
 
 // MAIN
