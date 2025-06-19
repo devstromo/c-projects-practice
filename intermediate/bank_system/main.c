@@ -879,7 +879,7 @@ void viewAccountBalance()
                    searchedAccount.accountType,
                    searchedAccount.dateOpened,
                    searchedAccount.lastTransactionDate);
-            printf("Balance for account holder '%s' (Account Number: %d): %.2f\n",
+            printf("\nBalance for account holder '%s' (Account Number: %d): %.2f\n",
                    searchedAccount.accountHolder,
                    searchedAccount.accountNumber,
                    searchedAccount.balance);
