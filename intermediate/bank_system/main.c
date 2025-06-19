@@ -858,24 +858,34 @@ void viewAccountBalance()
         return;
     }
     char accountLine[256];
-    int anyAccount = 0;
+    int accountFound = 0;
     char searchName[50];
+    BankAccount searchedAccount;
     printf("Enter account holder name to get balance: ");
     scanf(" %[^\n]", searchName);
     while (fgets(accountLine, sizeof(accountLine), recordAccountView))
     {
-        if (anyAccount == 0 && accountLine[0] == 'A')
+        if (accountFound == 0 && accountLine[0] == 'A')
         {
-            anyAccount = 1;
             continue;
         }
         if (strstr(accountLine, searchName) != NULL)
         {
-            printf("%s", accountLine);
-            anyAccount++;
+            accountFound = 1;
+            sscanf(accountLine, "%d,\"%49[^\"]\",%lf,\"%19[^\"]\",\"%10[^\"]\",\"%10[^\"]\"",
+                   &searchedAccount.accountNumber,
+                   searchedAccount.accountHolder,
+                   &searchedAccount.balance,
+                   searchedAccount.accountType,
+                   searchedAccount.dateOpened,
+                   searchedAccount.lastTransactionDate);
+            printf("Balance for account holder '%s' (Account Number: %d): %.2f\n",
+                   searchedAccount.accountHolder,
+                   searchedAccount.accountNumber,
+                   searchedAccount.balance);
         }
     }
-    if (anyAccount == 1)
+    if (accountFound == 0)
     {
         printf("\n\nNo accounts found with the name '%s'.\n\n", searchName);
     }
