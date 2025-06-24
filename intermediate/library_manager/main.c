@@ -1,5 +1,14 @@
 #include <stdio.h>
 
+typedef struct
+{
+    char title[100];
+    char author[100];
+    int year;
+    char url[200];
+} Book;
+
+
 void addBook()
 {
     // This function will handle adding a new book to the library.
