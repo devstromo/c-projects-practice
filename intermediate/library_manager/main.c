@@ -1,5 +1,13 @@
 #include <stdio.h>
 
+void addBook()
+{
+    // This function will handle adding a new book to the library.
+    // It will prompt the user for book details and store them in the library's collection.
+    printf("Adding a new book...\n");
+    // Implementation goes here
+}
+
 int main()
 {
     // This is the main function of the library management system.
@@ -26,7 +34,7 @@ int main()
         switch (choice)
         {
         case 1:
-            // Code to add a new book
+            addBook();
             break;
         case 2:
             // Code to remove a book
