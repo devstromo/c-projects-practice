@@ -23,6 +23,14 @@ void initBookDB()
     }
 }
 
+FILE *open_file(const char *path, const char *mode) {
+    FILE *file = fopen(path, mode);
+    if (file == NULL) {
+        printf("Error: Cannot open file '%s' with mode '%s'\n", path, mode);
+    }
+    return file;
+}
+
 void addBook()
 {
     // This function will handle adding a new book to the library.
