@@ -23,6 +23,26 @@ int main()
         printf("4. View all books\n");
         printf("5. Exit\n");
         scanf("%d", &choice);
+        switch (choice)
+        {
+        case 1:
+            // Code to add a new book
+            break;
+        case 2:
+            // Code to remove a book
+            break;
+        case 3:
+            // Code to search for a book
+            break;
+        case 4:
+            // Code to view all books
+            break;
+        case 5:
+            printf("Exiting the Library Management System. Goodbye!\n");
+            break;
+        default:
+            printf("Invalid choice. Please try again.\n");
+        }
     } while (choice != 5);
 
     return 0;
