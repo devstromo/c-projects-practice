@@ -80,12 +80,19 @@ void addBook()
     printf("Enter book author: ");
     scanf(" %[^\n]", newBook.author);
     printf("Enter book year: ");
-    scanf("%d", &newBook.year);
+    if (scanf("%d", &newBook.year) != 1)
+    {
+        printf("Invalid year input.\n");
+        return;
+    }
     printf("Enter book URL (or file path): ");
     char url[MAX_PATH_LEN];
     scanf(" %[^\n]", url);
 
     normalize_path(url, newBook.url, sizeof(newBook.url));
+
+    printf("\nBook added:\nTitle: %s\nAuthor: %s\nYear: %d\nURL: %s\n",
+           newBook.title, newBook.author, newBook.year, newBook.url);
 }
 
 int main()
