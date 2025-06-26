@@ -35,6 +35,32 @@ FILE *open_file(const char *path, const char *mode) {
     return file;
 }
 
+int is_web_url(const char *input) {
+    return strncmp(input, "http://", 7) == 0 || strncmp(input, "https://", 8) == 0;
+}
+
+// Normalize file:// URI into local path
+void normalize_path(const char *input, char *out) {
+#ifdef _WIN32
+    // Windows: file:///C:/Users/... -> C:\Users\...
+    if (strncmp(input, "file:///", 8) == 0) {
+        strcpy(out, input + 8);
+        for (char *p = out; *p; ++p)
+            if (*p == '/')
+                *p = '\\';
+    } else {
+        strcpy(out, input);
+    }
+#else
+    // Linux/macOS: file:///home/user/... -> /home/user/...
+    if (strncmp(input, "file://", 7) == 0) {
+        strcpy(out, input + 7);
+    } else {
+        strcpy(out, input);
+    }
+#endif
+}
+
 void addBook()
 {
     // This function will handle adding a new book to the library.
