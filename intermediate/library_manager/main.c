@@ -71,8 +71,6 @@ void normalize_path(const char *input, char *output, size_t max_len)
 
 void addBook()
 {
-    // This function will handle adding a new book to the library.
-    // It will prompt the user for book details and store them in the library's collection.
     printf("Adding a new book...\n");
     Book newBook;
     printf("Enter book title: ");
