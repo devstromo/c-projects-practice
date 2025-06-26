@@ -9,7 +9,7 @@ typedef struct
     char title[100];
     char author[100];
     int year;
-    char url[200];
+    char url[MAX_PATH_LEN];
 } Book;
 
 void initBookDB()
@@ -27,38 +27,46 @@ void initBookDB()
     }
 }
 
-FILE *open_file(const char *path, const char *mode) {
+FILE *open_file(const char *path, const char *mode)
+{
     FILE *file = fopen(path, mode);
-    if (file == NULL) {
+    if (file == NULL)
+    {
         printf("Error: Cannot open file '%s' with mode '%s'\n", path, mode);
     }
     return file;
 }
 
-int is_web_url(const char *input) {
+int is_web_url(const char *input)
+{
     return strncmp(input, "http://", 7) == 0 || strncmp(input, "https://", 8) == 0;
 }
 
 // Normalize file:// URI into local path
-void normalize_path(const char *input, char *out) {
+void normalize_path(const char *input, char *output, size_t max_len)
+{
+    if (strncmp(input, "file:///", 8) == 0)
+    {
+        // Windows-style path
+        strncpy(output, input + 8, max_len - 1);
 #ifdef _WIN32
-    // Windows: file:///C:/Users/... -> C:\Users\...
-    if (strncmp(input, "file:///", 8) == 0) {
-        strcpy(out, input + 8);
-        for (char *p = out; *p; ++p)
+        // Convert forward slashes to backslashes
+        for (char *p = output; *p; ++p)
             if (*p == '/')
                 *p = '\\';
-    } else {
-        strcpy(out, input);
-    }
-#else
-    // Linux/macOS: file:///home/user/... -> /home/user/...
-    if (strncmp(input, "file://", 7) == 0) {
-        strcpy(out, input + 7);
-    } else {
-        strcpy(out, input);
-    }
 #endif
+    }
+    else if (strncmp(input, "file://", 7) == 0)
+    {
+        // Unix-style path
+        strncpy(output, input + 7, max_len - 1);
+    }
+    else
+    {
+        // Leave other URLs or paths as-is
+        strncpy(output, input, max_len - 1);
+    }
+    output[max_len - 1] = '\0'; // Always null-terminate
 }
 
 void addBook()
@@ -66,7 +74,18 @@ void addBook()
     // This function will handle adding a new book to the library.
     // It will prompt the user for book details and store them in the library's collection.
     printf("Adding a new book...\n");
-    // Implementation goes here
+    Book newBook;
+    printf("Enter book title: ");
+    scanf(" %[^\n]", newBook.title);
+    printf("Enter book author: ");
+    scanf(" %[^\n]", newBook.author);
+    printf("Enter book year: ");
+    scanf("%d", &newBook.year);
+    printf("Enter book URL (or file path): ");
+    char url[MAX_PATH_LEN];
+    scanf(" %[^\n]", url);
+
+    normalize_path(url, newBook.url, sizeof(newBook.url));
 }
 
 int main()
