@@ -73,6 +73,7 @@ void addBook()
 {
     printf("Adding a new book...\n");
     Book newBook;
+
     printf("Enter book title: ");
     scanf(" %[^\n]", newBook.title);
     printf("Enter book author: ");
@@ -83,11 +84,24 @@ void addBook()
         printf("Invalid year input.\n");
         return;
     }
+
     printf("Enter book URL (or file path): ");
     char url[MAX_PATH_LEN];
     scanf(" %[^\n]", url);
 
     normalize_path(url, newBook.url, sizeof(newBook.url));
+
+    FILE *file = open_file("books.csv", "a");
+    if (file != NULL)
+    {
+        fprintf(file, "\"%s\",\"%s\",%d,\"%s\"\n",
+                newBook.title,
+                newBook.author,
+                newBook.year,
+                newBook.url);
+        fclose(file);
+        printf("Book saved to database.\n");
+    }
 
     printf("\nBook added:\nTitle: %s\nAuthor: %s\nYear: %d\nURL: %s\n",
            newBook.title, newBook.author, newBook.year, newBook.url);
