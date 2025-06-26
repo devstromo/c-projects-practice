@@ -85,11 +85,22 @@ void addBook()
         return;
     }
 
-    printf("Enter book URL (or file path): ");
+    printf("Enter book URL (or file path) [optional]: ");
     char url[MAX_PATH_LEN];
-    scanf(" %[^\n]", url);
+    fgets(url, sizeof(url), stdin); // flush leftover newline first
+    fgets(url, sizeof(url), stdin); // now get the actual URL input
 
-    normalize_path(url, newBook.url, sizeof(newBook.url));
+    // Remove trailing newline
+    url[strcspn(url, "\n")] = '\0';
+
+    if (strlen(url) > 0)
+    {
+        normalize_path(url, newBook.url, sizeof(newBook.url));
+    }
+    else
+    {
+        newBook.url[0] = '\0'; // set to empty string if user skipped input
+    }
 
     FILE *file = open_file("books.csv", "a");
     if (file != NULL)
