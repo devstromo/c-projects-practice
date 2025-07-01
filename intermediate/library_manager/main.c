@@ -173,6 +173,9 @@ void searchBook()
     char line[256];
     int found = 0;
     int anyBooks = 0;
+    char searchTermLower[100];
+    strcpy(searchTermLower, searchTerm);
+    to_lowercase(searchTermLower);
 
     while (fgets(line, sizeof(line), file))
     {
@@ -181,7 +184,11 @@ void searchBook()
             anyBooks = 1;
             continue;
         }
-        if (strstr(line, searchTerm) != NULL)
+        char lineCopy[256];
+        strcpy(lineCopy, line);
+        to_lowercase(lineCopy);
+
+        if (strstr(lineCopy, searchTermLower) != NULL)
         {
             printf("%s", line);
             found = 1;
