@@ -118,6 +118,37 @@ void addBook()
            newBook.title, newBook.author, newBook.year, newBook.url);
 }
 
+void viewBooks()
+{
+    printf("Viewing all books...\n");
+    FILE *file = open_file("books.csv", "r");
+    if (file == NULL)
+    {
+        printf("No books found (file missing).\n");
+        return;
+    }
+
+    char line[256];
+    int anyBooks = 0;
+
+    while (fgets(line, sizeof(line), file))
+    {
+        if (anyBooks == 0 && strncmp(line, "Title", 5) == 0)
+        {
+            anyBooks = 1; // Skip header line
+            continue;
+        }
+        printf("%s", line);
+        anyBooks++;
+    }
+
+    if (anyBooks == 1)
+    {
+        printf("\n\nNo books found.\n\n");
+    }
+    fclose(file);
+}
+
 int main()
 {
     initBookDB();
@@ -146,7 +177,7 @@ int main()
             // Code to search for a book
             break;
         case 4:
-            // Code to view all books
+            viewBooks();
             break;
         case 5:
             printf("Exiting the Library Management System. Goodbye!\n");
