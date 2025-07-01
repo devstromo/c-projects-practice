@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define MAX_PATH_LEN 1024
 
@@ -11,6 +12,12 @@ typedef struct
     int year;
     char url[MAX_PATH_LEN];
 } Book;
+
+void to_lowercase(char *str)
+{
+    for (; *str; ++str)
+        *str = tolower(*str);
+}
 
 void initBookDB()
 {
