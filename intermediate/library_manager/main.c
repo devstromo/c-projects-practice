@@ -165,16 +165,27 @@ void searchBook()
 
     char line[256];
     int found = 0;
+    int anyBooks = 0;
 
     while (fgets(line, sizeof(line), file))
     {
+        if (anyBooks == 0 && strncmp(line, "Title", 5) == 0)
+        {
+            anyBooks = 1;
+            continue;
+        }
         if (strstr(line, searchTerm) != NULL)
         {
             printf("%s", line);
             found = 1;
         }
+        anyBooks++;
     }
 
+    if (anyBooks == 1)
+    {
+        printf("\n\nNo books found.\n\n");
+    }
     if (!found)
     {
         printf("No books found matching '%s'.\n", searchTerm);
@@ -182,7 +193,6 @@ void searchBook()
 
     fclose(file);
 }
-
 
 int main()
 {
