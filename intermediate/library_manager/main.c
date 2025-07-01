@@ -149,6 +149,41 @@ void viewBooks()
     fclose(file);
 }
 
+void searchBook()
+{
+    printf("Searching for a book...\n");
+    char searchTerm[100];
+    printf("Enter book title or author to search: ");
+    scanf(" %[^\n]", searchTerm);
+
+    FILE *file = open_file("books.csv", "r");
+    if (file == NULL)
+    {
+        printf("No books found (file missing).\n");
+        return;
+    }
+
+    char line[256];
+    int found = 0;
+
+    while (fgets(line, sizeof(line), file))
+    {
+        if (strstr(line, searchTerm) != NULL)
+        {
+            printf("%s", line);
+            found = 1;
+        }
+    }
+
+    if (!found)
+    {
+        printf("No books found matching '%s'.\n", searchTerm);
+    }
+
+    fclose(file);
+}
+
+
 int main()
 {
     initBookDB();
@@ -174,7 +209,7 @@ int main()
             // Code to remove a book
             break;
         case 3:
-            // Code to search for a book
+            searchBook();
             break;
         case 4:
             viewBooks();
