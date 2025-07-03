@@ -285,6 +285,11 @@ void removeBook()
     }
 }
 
+void updateBookData()
+{
+    printf("Updating book data...\n");
+}
+
 int main()
 {
     initBookDB();
@@ -316,6 +321,9 @@ int main()
             viewBooks();
             break;
         case 5:
+            updateBookData();
+            break;
+        case 6:
             printf("Exiting the Library Management System. Goodbye!\n");
             break;
         default:
