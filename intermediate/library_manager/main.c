@@ -211,6 +211,78 @@ void searchBook()
 void removeBook()
 {
     printf("Removing a book...\n");
+    char searchTerm[100];
+    printf("Enter book title or author to search: ");
+    scanf(" %[^\n]", searchTerm);
+
+    FILE *file = open_file("books.csv", "r");
+    if (file == NULL)
+    {
+        printf("No books found (file missing).\n");
+        return;
+    }
+
+    FILE *temp = open_file("temp_books.csv", "w");
+    if (temp == NULL)
+    {
+        fclose(file);
+        return;
+    }
+
+    char line[256];
+    int found = 0;
+    int isHeader = 1;
+
+    char searchTermLower[100];
+    strcpy(searchTermLower, searchTerm);
+    to_lowercase(searchTermLower);
+
+    while (fgets(line, sizeof(line), file))
+    {
+        if (isHeader)
+        {
+            fprintf(temp, "%s", line); // copy header as is
+            isHeader = 0;
+            continue;
+        }
+
+        char lineCopy[256];
+        strcpy(lineCopy, line);
+        to_lowercase(lineCopy);
+
+        if (strstr(lineCopy, searchTermLower) != NULL)
+        {
+            printf("Deleted book: %s", line);
+            found = 1;
+            continue; // skip writing this line to temp file
+        }
+
+        fprintf(temp, "%s", line); // copy other lines
+    }
+
+    fclose(file);
+    fclose(temp);
+
+    if (!found)
+    {
+        printf("No books found matching '%s'.\n", searchTerm);
+        remove("temp_books.csv"); // clean up temp file
+    }
+    else
+    {
+        if (remove("books.csv") != 0)
+        {
+            perror("Error deleting original file");
+        }
+        else if (rename("temp_books.csv", "books.csv") != 0)
+        {
+            perror("Error renaming temp file");
+        }
+        else
+        {
+            printf("Book removed successfully.\n");
+        }
+    }
 }
 
 int main()
