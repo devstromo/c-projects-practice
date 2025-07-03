@@ -208,6 +208,11 @@ void searchBook()
     fclose(file);
 }
 
+void removeBook()
+{
+    printf("Removing a book...\n");
+}
+
 int main()
 {
     initBookDB();
@@ -230,7 +235,7 @@ int main()
             addBook();
             break;
         case 2:
-            // Code to remove a book
+            removeBook();
             break;
         case 3:
             searchBook();
