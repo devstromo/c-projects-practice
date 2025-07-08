@@ -288,20 +288,29 @@ void removeBook()
 void updateBookData()
 {
     printf("Updating book data...\n");
+
+    printf("Enter book title or author to update: ");
+    char searchTerm[100];
+    scanf(" %[^\n]", searchTerm);
+
     FILE *file = open_file("books.csv", "r");
     if (file == NULL)
     {
         printf("No books found (file missing).\n");
         return;
     }
+
     FILE *temp = open_file("temp_books.csv", "w");
     if (temp == NULL)
     {
         fclose(file);
         return;
     }
+
     char line[256];
     int isHeader = 1;
+    int found = 0;
+
     while (fgets(line, sizeof(line), file))
     {
         if (isHeader)
@@ -317,42 +326,66 @@ void updateBookData()
         // Parse the line
         sscanf(line, "\"%[^\"]\",\"%[^\"]\",%d,\"%[^\"]\"", title, author, &year, url);
 
-        // Update the book data as needed
-        printf("Current data: Title: %s, Author: %s, Year: %d, URL: %s\n", title, author, year, url);
-        printf("Enter new title (or press Enter to keep current): ");
-        char newTitle[100];
-        fgets(newTitle, sizeof(newTitle), stdin);
-        newTitle[strcspn(newTitle, "\n")] = 0; // Remove trailing newline
+        // Check if line matches search term (case-insensitive)
+        char titleLower[100], authorLower[100], searchTermLower[100];
+        strcpy(titleLower, title);
+        strcpy(authorLower, author);
+        strcpy(searchTermLower, searchTerm);
+        to_lowercase(titleLower);
+        to_lowercase(authorLower);
+        to_lowercase(searchTermLower);
 
-        if (strlen(newTitle) > 0)
-            strcpy(title, newTitle);
+        if (strstr(titleLower, searchTermLower) != NULL || strstr(authorLower, searchTermLower) != NULL)
+        {
+            found = 1;
+            printf("Current data:\nTitle: %s\nAuthor: %s\nYear: %d\nURL: %s\n", title, author, year, url);
 
-        printf("Enter new author (or press Enter to keep current): ");
-        char newAuthor[100];
-        fgets(newAuthor, sizeof(newAuthor), stdin);
-        newAuthor[strcspn(newAuthor, "\n")] = 0; // Remove trailing newline
+            // Clear stdin leftover
+            getchar();
 
-        if (strlen(newAuthor) > 0)
-            strcpy(author, newAuthor);
+            printf("Enter new title (or press Enter to keep current): ");
+            char newTitle[100];
+            fgets(newTitle, sizeof(newTitle), stdin);
+            newTitle[strcspn(newTitle, "\n")] = 0; // Remove trailing newline
+            if (strlen(newTitle) > 0)
+                strcpy(title, newTitle);
 
-        printf("Enter new year (or press Enter to keep current): ");
-        char yearInput[10];
-        fgets(yearInput, sizeof(yearInput), stdin);
-        if (strlen(yearInput) > 1) // If input is not just Enter
-            sscanf(yearInput, "%d", &year);
+            printf("Enter new author (or press Enter to keep current): ");
+            char newAuthor[100];
+            fgets(newAuthor, sizeof(newAuthor), stdin);
+            newAuthor[strcspn(newAuthor, "\n")] = 0;
+            if (strlen(newAuthor) > 0)
+                strcpy(author, newAuthor);
 
-        printf("Enter new URL (or press Enter to keep current): ");
-        char newUrl[MAX_PATH_LEN];
-        fgets(newUrl, sizeof(newUrl), stdin);
-        newUrl[strcspn(newUrl, "\n")] = 0; // Remove trailing newline
+            printf("Enter new year (or press Enter to keep current): ");
+            char yearInput[10];
+            fgets(yearInput, sizeof(yearInput), stdin);
+            if (strlen(yearInput) > 1)
+                sscanf(yearInput, "%d", &year);
 
-        if (strlen(newUrl) > 0)
-            normalize_path(newUrl, url, sizeof(url));
+            printf("Enter new URL (or press Enter to keep current): ");
+            char newUrl[MAX_PATH_LEN];
+            fgets(newUrl, sizeof(newUrl), stdin);
+            newUrl[strcspn(newUrl, "\n")] = 0;
+            if (strlen(newUrl) > 0)
+                normalize_path(newUrl, url, sizeof(url));
+        }
 
+        // Write the (possibly updated) line to temp file
         fprintf(temp, "\"%s\",\"%s\",%d,\"%s\"\n", title, author, year, url);
     }
+
     fclose(file);
     fclose(temp);
+
+    if (!found)
+    {
+        printf("No book found matching '%s'.\n", searchTerm);
+        remove("temp_books.csv");
+        return;
+    }
+
+    // Replace original file with updated temp file
     if (remove("books.csv") != 0)
     {
         perror("Error deleting original file");
@@ -365,7 +398,7 @@ void updateBookData()
     {
         printf("Book data updated successfully.\n");
     }
-    printf("All book data has been updated.\n");
+
     printf("Returning to main menu...\n");
 }
 
