@@ -24,6 +24,19 @@ void ensure_bookstore_folder()
 #endif
 }
 
+void copy_file(const char *source, const char *destination)
+{
+#ifdef _WIN32
+    char command[MAX_PATH_LEN * 2];
+    snprintf(command, sizeof(command), "copy \"%s\" \"%s\"", source, destination);
+#else
+    char command[MAX_PATH_LEN * 2];
+    snprintf(command, sizeof(command), "cp \"%s\" \"%s\"", source, destination);
+#endif
+    printf("Copying from %s to %s...\n", source, destination);
+    system(command);
+}
+
 void download_pdf(const char *url, const char *destination_path)
 {
     char command[MAX_PATH_LEN * 2];
