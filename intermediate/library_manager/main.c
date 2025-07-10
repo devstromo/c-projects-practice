@@ -13,6 +13,12 @@ typedef struct
     char url[MAX_PATH_LEN];
 } Book;
 
+int ends_with_pdf(const char *filename)
+{
+    size_t len = strlen(filename);
+    return len >= 4 && strcmp(filename + len - 4, ".pdf") == 0;
+}
+
 void to_lowercase(char *str)
 {
     for (; *str; ++str)
