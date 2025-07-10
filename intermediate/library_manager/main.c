@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #define MAX_PATH_LEN 1024
 
@@ -12,6 +14,23 @@ typedef struct
     int year;
     char url[MAX_PATH_LEN];
 } Book;
+
+void ensure_bookstore_folder()
+{
+#ifdef _WIN32
+    _mkdir("bookstore");
+#else
+    mkdir("bookstore", 0755);
+#endif
+}
+
+void download_pdf(const char *url, const char *destination_path)
+{
+    char command[MAX_PATH_LEN * 2];
+    snprintf(command, sizeof(command), "curl -L \"%s\" -o \"%s\"", url, destination_path);
+    printf("Downloading from %s to %s...\n", url, destination_path);
+    system(command);
+}
 
 int ends_with_pdf(const char *filename)
 {
