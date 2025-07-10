@@ -424,6 +424,23 @@ void updateBookData()
             newUrl[strcspn(newUrl, "\n")] = 0;
             if (strlen(newUrl) > 0)
                 normalize_path(newUrl, url, sizeof(url));
+
+            if (strlen(url) > 0 && ends_with_pdf(url))
+            {
+                ensure_bookstore_folder();
+
+                char dest_path[MAX_PATH_LEN];
+                snprintf(dest_path, sizeof(dest_path), "bookstore/%s_%d.pdf", title, year);
+
+                if (is_web_url(url))
+                {
+                    download_pdf(url, dest_path);
+                }
+                else
+                {
+                    copy_file(url, dest_path);
+                }
+            }
         }
 
         // Write the (possibly updated) line to temp file
