@@ -80,4 +80,4 @@ Makefile
 *.sequence
 *.seq
 *.csv
-*/bookstore/*
+**/bookstore/**
