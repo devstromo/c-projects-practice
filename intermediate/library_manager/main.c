@@ -18,7 +18,7 @@ typedef struct
 void ensure_bookstore_folder()
 {
 #ifdef _WIN32
-    _mkdir("bookstore");
+    mkdir("bookstore");
 #else
     mkdir("bookstore", 0755);
 #endif
