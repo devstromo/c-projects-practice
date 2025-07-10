@@ -147,6 +147,23 @@ void addBook()
         newBook.url[0] = '\0'; // set to empty string if user skipped input
     }
 
+    if (strlen(newBook.url) > 0 && ends_with_pdf(newBook.url))
+    {
+        ensure_bookstore_folder();
+
+        char dest_path[MAX_PATH_LEN];
+        snprintf(dest_path, sizeof(dest_path), "bookstore/%s_%d.pdf", newBook.title, newBook.year);
+
+        if (is_web_url(newBook.url))
+        {
+            download_pdf(newBook.url, dest_path);
+        }
+        else
+        {
+            copy_file(newBook.url, dest_path);
+        }
+    }
+
     FILE *file = open_file("books.csv", "a");
     if (file != NULL)
     {
