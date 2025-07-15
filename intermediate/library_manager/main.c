@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 #define MAX_PATH_LEN 1024
 
@@ -55,6 +56,21 @@ void to_lowercase(char *str)
 {
     for (; *str; ++str)
         *str = tolower(*str);
+}
+
+void log_action(const char *action, const char *title)
+{
+    FILE *log = fopen("history.log", "a");
+    if (!log)
+        return;
+
+    time_t now = time(NULL);
+    struct tm *tm_info = localtime(&now);
+    char time_str[32];
+    strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S", tm_info);
+
+    fprintf(log, "[%s] %s: %s\n", time_str, action, title);
+    fclose(log);
 }
 
 void initBookDB()
@@ -178,6 +194,7 @@ void addBook()
 
     printf("\nBook added:\nTitle: %s\nAuthor: %s\nYear: %d\nURL: %s\n",
            newBook.title, newBook.author, newBook.year, newBook.url);
+    log_action("ADDED", newBook.title);
 }
 
 void viewBooks()
@@ -308,6 +325,7 @@ void removeBook()
         if (strstr(lineCopy, searchTermLower) != NULL)
         {
             printf("Deleted book: %s", line);
+            log_action("REMOVED", line);
             found = 1;
             continue; // skip writing this line to temp file
         }
@@ -441,6 +459,7 @@ void updateBookData()
                     copy_file(url, dest_path);
                 }
             }
+            log_action("UPDATED", title);
         }
 
         // Write the (possibly updated) line to temp file
