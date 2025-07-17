@@ -130,13 +130,18 @@ void normalize_path(const char *input, char *output, size_t max_len)
     output[max_len - 1] = '\0'; // Always null-terminate
 }
 
-void sanitize_filename(const char *input, char *output, size_t max_len) {
+void sanitize_filename(const char *input, char *output, size_t max_len)
+{
     size_t j = 0;
-    for (size_t i = 0; i < strlen(input) && j < max_len - 1; ++i) {
+    for (size_t i = 0; i < strlen(input) && j < max_len - 1; ++i)
+    {
         char c = input[i];
-        if (isalnum(c) || c == '_' || c == '-') {
+        if (isalnum(c) || c == '_' || c == '-')
+        {
             output[j++] = c;
-        } else if (isspace(c)) {
+        }
+        else if (isspace(c))
+        {
             output[j++] = '_';
         }
         // ignore special chars like '/', ':', etc.
@@ -464,7 +469,9 @@ void updateBookData()
                 ensure_bookstore_folder();
 
                 char dest_path[MAX_PATH_LEN];
-                snprintf(dest_path, sizeof(dest_path), "bookstore/%s_%d.pdf", title, year);
+                char filename[256];
+                sanitize_filename(title, filename, sizeof(filename));
+                snprintf(dest_path, sizeof(dest_path), "bookstore/%s_%d.pdf", filename, year);
 
                 if (is_web_url(url))
                 {
