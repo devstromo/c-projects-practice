@@ -551,41 +551,71 @@ void filterBooksByAuthorOrYear()
     fclose(file);
 }
 
-void openBook()
-{
+void openBook() {
     char title[100];
-    int year;
-    printf("Enter book title: ");
+    printf("Enter book title to open its PDF: ");
     scanf(" %[^\n]", title);
-    printf("Enter book year: ");
-    scanf("%d", &year);
 
-    char filename[256];
-    sanitize_filename(title, filename, sizeof(filename));
+    char sanitized[100];
+    sanitize_filename(title, sanitized, sizeof(sanitized));
 
-    char path[MAX_PATH_LEN];
-    snprintf(path, sizeof(path), "bookstore/%s_%d.pdf", filename, year);
+    // Pattern prefix
+    char prefix[MAX_PATH_LEN];
+    snprintf(prefix, sizeof(prefix), "bookstore/%s_", sanitized);
 
-    FILE *file = fopen(path, "r");
-    if (!file)
-    {
-        printf("PDF file not found: %s\n", path);
+    // Try to open bookstore dir
+    struct _finddata_t file_info;
+    intptr_t handle;
+    char search_path[MAX_PATH_LEN];
+    snprintf(search_path, sizeof(search_path), "bookstore/%s_*.pdf", sanitized);
+
+    handle = _findfirst(search_path, &file_info);
+    if (handle == -1) {
+        printf("No PDF found with title \"%s\".\n", title);
         return;
     }
-    fclose(file);
+
+    // Store all matched paths
+    char matches[10][MAX_PATH_LEN];
+    int count = 0;
+
+    do {
+        snprintf(matches[count], MAX_PATH_LEN, "bookstore/%s", file_info.name);
+        printf("%d. %s\n", count + 1, file_info.name);
+        count++;
+    } while (_findnext(handle, &file_info) == 0 && count < 10);
+
+    _findclose(handle);
+
+    if (count == 1) {
+        // Only one match — open directly
+#ifdef _WIN32
+        char command[MAX_PATH_LEN * 2];
+        snprintf(command, sizeof(command), "start \"\" \"%s\"", matches[0]);
+#else
+        char command[MAX_PATH_LEN * 2];
+        snprintf(command, sizeof(command), "xdg-open \"%s\" >/dev/null 2>&1 &", matches[0]);
+#endif
+        system(command);
+    } else {
+        int choice;
+        printf("Enter the number of the book to open: ");
+        if (scanf("%d", &choice) != 1 || choice < 1 || choice > count) {
+            printf("Invalid choice.\n");
+            return;
+        }
 
 #ifdef _WIN32
-    char command[MAX_PATH_LEN * 2];
-    snprintf(command, sizeof(command), "start \"\" \"%s\"", path);
+        char command[MAX_PATH_LEN * 2];
+        snprintf(command, sizeof(command), "start \"\" \"%s\"", matches[choice - 1]);
 #else
-    char command[MAX_PATH_LEN * 2];
-    snprintf(command, sizeof(command), "xdg-open \"%s\" >/dev/null 2>&1 &", path);
+        char command[MAX_PATH_LEN * 2];
+        snprintf(command, sizeof(command), "xdg-open \"%s\" >/dev/null 2>&1 &", matches[choice - 1]);
 #endif
-
-    printf("Opening file: %s\n", path);
-    system(command);
-    log_action("OPENED", title);
+        system(command);
+    }
 }
+
 int main()
 {
     initBookDB();
