@@ -130,6 +130,20 @@ void normalize_path(const char *input, char *output, size_t max_len)
     output[max_len - 1] = '\0'; // Always null-terminate
 }
 
+void sanitize_filename(const char *input, char *output, size_t max_len) {
+    size_t j = 0;
+    for (size_t i = 0; i < strlen(input) && j < max_len - 1; ++i) {
+        char c = input[i];
+        if (isalnum(c) || c == '_' || c == '-') {
+            output[j++] = c;
+        } else if (isspace(c)) {
+            output[j++] = '_';
+        }
+        // ignore special chars like '/', ':', etc.
+    }
+    output[j] = '\0';
+}
+
 void addBook()
 {
     printf("Adding a new book...\n");
