@@ -544,7 +544,7 @@ int main()
         printf("4. View all books\n");
         printf("5. Update book data\n");
         printf("6. Filter books by author or year\n");
-        printf("7. Exit\n");
+        printf("8. Exit\n");
         scanf("%d", &choice);
         switch (choice)
         {
@@ -566,13 +566,13 @@ int main()
         case 6:
             filterBooksByAuthorOrYear();
             break;
-        case 7:
+        case 8:
             printf("Exiting the Library Management System. Goodbye!\n");
             break;
         default:
             printf("Invalid choice. Please try again.\n");
         }
-    } while (choice != 7);
+    } while (choice != 8);
 
     return 0;
 }
