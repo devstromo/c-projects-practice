@@ -493,6 +493,41 @@ void updateBookData()
     printf("Returning to main menu...\n");
 }
 
+void filterBooksByAuthorOrYear()
+{
+    char filter[100];
+    printf("Enter author name or year: ");
+    scanf(" %[^\n]", filter);
+
+    int filterYear = atoi(filter);
+
+    FILE *file = open_file("books.csv", "r");
+    if (!file)
+        return;
+
+    char line[256];
+    fgets(line, sizeof(line), file); // skip header
+
+    int found = 0;
+    while (fgets(line, sizeof(line), file))
+    {
+        char title[100], author[100], url[MAX_PATH_LEN];
+        int year;
+        sscanf(line, "\"%[^\"]\",\"%[^\"]\",%d,\"%[^\"]\"", title, author, &year, url);
+
+        if (strstr(author, filter) || (filterYear > 0 && year == filterYear))
+        {
+            printf("%s", line);
+            found = 1;
+        }
+    }
+
+    if (!found)
+        printf("No books match the filter.\n");
+
+    fclose(file);
+}
+
 int main()
 {
     initBookDB();
@@ -508,7 +543,8 @@ int main()
         printf("3. Search for a book\n");
         printf("4. View all books\n");
         printf("5. Update book data\n");
-        printf("6. Exit\n");
+        printf("6. Filter books by author or year\n");
+        printf("7. Exit\n");
         scanf("%d", &choice);
         switch (choice)
         {
@@ -528,12 +564,15 @@ int main()
             updateBookData();
             break;
         case 6:
+            filterBooksByAuthorOrYear();
+            break;
+        case 7:
             printf("Exiting the Library Management System. Goodbye!\n");
             break;
         default:
             printf("Invalid choice. Please try again.\n");
         }
-    } while (choice != 6);
+    } while (choice != 7);
 
     return 0;
 }
