@@ -528,6 +528,26 @@ void filterBooksByAuthorOrYear()
     fclose(file);
 }
 
+void openBook()
+{
+    char title[100];
+    printf("Enter book title to open its PDF: ");
+    scanf(" %[^\n]", title);
+
+    char path[MAX_PATH_LEN];
+    snprintf(path, sizeof(path), "bookstore/%s_*.pdf", title);
+
+#ifdef _WIN32
+    char command[MAX_PATH_LEN * 2];
+    snprintf(command, sizeof(command), "start \"\" \"%s\"", path);
+#else
+    char command[MAX_PATH_LEN * 2];
+    snprintf(command, sizeof(command), "xdg-open \"%s\" >/dev/null 2>&1 &", path);
+#endif
+
+    system(command);
+}
+
 int main()
 {
     initBookDB();
@@ -544,6 +564,7 @@ int main()
         printf("4. View all books\n");
         printf("5. Update book data\n");
         printf("6. Filter books by author or year\n");
+        printf("7. Open a book PDF\n");
         printf("8. Exit\n");
         scanf("%d", &choice);
         switch (choice)
@@ -565,6 +586,9 @@ int main()
             break;
         case 6:
             filterBooksByAuthorOrYear();
+            break;
+        case 7:
+            openBook();
             break;
         case 8:
             printf("Exiting the Library Management System. Goodbye!\n");
