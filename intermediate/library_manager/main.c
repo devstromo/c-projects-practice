@@ -182,7 +182,9 @@ void addBook()
         ensure_bookstore_folder();
 
         char dest_path[MAX_PATH_LEN];
-        snprintf(dest_path, sizeof(dest_path), "bookstore/%s_%d.pdf", newBook.title, newBook.year);
+        char filename[256];
+        sanitize_filename(newBook.title, filename, sizeof(filename));
+        snprintf(dest_path, sizeof(dest_path), "bookstore/%s_%d.pdf", filename, newBook.year);
 
         if (is_web_url(newBook.url))
         {
