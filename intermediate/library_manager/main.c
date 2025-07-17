@@ -554,11 +554,25 @@ void filterBooksByAuthorOrYear()
 void openBook()
 {
     char title[100];
-    printf("Enter book title to open its PDF: ");
+    int year;
+    printf("Enter book title: ");
     scanf(" %[^\n]", title);
+    printf("Enter book year: ");
+    scanf("%d", &year);
+
+    char filename[256];
+    sanitize_filename(title, filename, sizeof(filename));
 
     char path[MAX_PATH_LEN];
-    snprintf(path, sizeof(path), "bookstore/%s_*.pdf", title);
+    snprintf(path, sizeof(path), "bookstore/%s_%d.pdf", filename, year);
+
+    FILE *file = fopen(path, "r");
+    if (!file)
+    {
+        printf("PDF file not found: %s\n", path);
+        return;
+    }
+    fclose(file);
 
 #ifdef _WIN32
     char command[MAX_PATH_LEN * 2];
@@ -568,9 +582,10 @@ void openBook()
     snprintf(command, sizeof(command), "xdg-open \"%s\" >/dev/null 2>&1 &", path);
 #endif
 
+    printf("Opening file: %s\n", path);
     system(command);
+    log_action("OPENED", title);
 }
-
 int main()
 {
     initBookDB();
