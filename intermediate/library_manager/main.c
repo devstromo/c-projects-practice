@@ -551,44 +551,53 @@ void filterBooksByAuthorOrYear()
     fclose(file);
 }
 
-void openBook() {
+int findBooksByTitle(const char *title, char matches[][MAX_PATH_LEN], int max_matches)
+{
+    char sanitized[100];
+    sanitize_filename(title, sanitized, sizeof(sanitized));
+
+    char search_path[MAX_PATH_LEN];
+    snprintf(search_path, sizeof(search_path), "bookstore/%s_*.pdf", sanitized);
+
+    struct _finddata_t file_info;
+    intptr_t handle = _findfirst(search_path, &file_info);
+
+    if (handle == -1)
+    {
+        return 0;
+    }
+
+    int count = 0;
+    do
+    {
+        if (count >= max_matches)
+            break;
+        snprintf(matches[count], MAX_PATH_LEN, "bookstore/%s", file_info.name);
+        count++;
+    } while (_findnext(handle, &file_info) == 0);
+
+    _findclose(handle);
+    return count;
+}
+
+void openBook()
+{
     char title[100];
     printf("Enter book title to open its PDF: ");
     scanf(" %[^\n]", title);
 
-    char sanitized[100];
-    sanitize_filename(title, sanitized, sizeof(sanitized));
+    char matches[10][MAX_PATH_LEN];
+    int found = findBooksByTitle(title, matches, 10);
 
-    // Pattern prefix
-    char prefix[MAX_PATH_LEN];
-    snprintf(prefix, sizeof(prefix), "bookstore/%s_", sanitized);
-
-    // Try to open bookstore dir
-    struct _finddata_t file_info;
-    intptr_t handle;
-    char search_path[MAX_PATH_LEN];
-    snprintf(search_path, sizeof(search_path), "bookstore/%s_*.pdf", sanitized);
-
-    handle = _findfirst(search_path, &file_info);
-    if (handle == -1) {
+    if (found == 0)
+    {
         printf("No PDF found with title \"%s\".\n", title);
         return;
     }
 
-    // Store all matched paths
-    char matches[10][MAX_PATH_LEN];
-    int count = 0;
-
-    do {
-        snprintf(matches[count], MAX_PATH_LEN, "bookstore/%s", file_info.name);
-        printf("%d. %s\n", count + 1, file_info.name);
-        count++;
-    } while (_findnext(handle, &file_info) == 0 && count < 10);
-
-    _findclose(handle);
-
-    if (count == 1) {
-        // Only one match — open directly
+    if (found == 1)
+    {
+        printf("Opening: %s\n", matches[0]);
 #ifdef _WIN32
         char command[MAX_PATH_LEN * 2];
         snprintf(command, sizeof(command), "start \"\" \"%s\"", matches[0]);
@@ -597,10 +606,19 @@ void openBook() {
         snprintf(command, sizeof(command), "xdg-open \"%s\" >/dev/null 2>&1 &", matches[0]);
 #endif
         system(command);
-    } else {
+    }
+    else
+    {
+        printf("Multiple books found:\n");
+        for (int i = 0; i < found; i++)
+        {
+            printf("%d. %s\n", i + 1, strrchr(matches[i], '/') + 1); // just filename
+        }
+
         int choice;
         printf("Enter the number of the book to open: ");
-        if (scanf("%d", &choice) != 1 || choice < 1 || choice > count) {
+        if (scanf("%d", &choice) != 1 || choice < 1 || choice > found)
+        {
             printf("Invalid choice.\n");
             return;
         }
