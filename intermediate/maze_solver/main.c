@@ -37,8 +37,8 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        int rows = atoi(argv[1]);
-        int cols = atoi(argv[2]);
+        rows = atoi(argv[1]);
+        cols = atoi(argv[2]);
 
         if (argc < 3 + rows * cols)
         {
