@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 
         int matrix[rows][cols];
 
-        int index = 3; // Start after rows and cols
+        int index = 4;
         for (int i = 0; i < rows; ++i)
             for (int j = 0; j < cols; ++j)
                 matrix[i][j] = atoi(argv[index++]);
