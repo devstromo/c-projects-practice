@@ -1,4 +1,6 @@
 #include "stdio.h"
+#include "stdlib.h"
+#include "string.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,7 +31,33 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "--input") == 0)
     {
-        // Read from argv[2..]
+        if (argc < 3)
+        {
+            printf("Usage: %s <rows> <cols> [data...]\n", argv[0]);
+            return 1;
+        }
+
+        int rows = atoi(argv[1]);
+        int cols = atoi(argv[2]);
+
+        if (argc < 3 + rows * cols)
+        {
+            printf("Error: Not enough data provided.\n");
+            return 1;
+        }
+
+        int matrix[rows][cols];
+
+        int index = 3; // Start after rows and cols
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                matrix[i][j] = atoi(argv[index++]);
+
+        // Example: print matrix
+        printf("Matrix:\n");
+        for (int i = 0; i < rows; ++i)
+            for (int j = 0; j < cols; ++j)
+                printf("%d%c", matrix[i][j], (j == cols - 1) ? '\n' : ' ');
     }
     printf("Maze Solver Program\n");
     // Implement maze solving logic here
