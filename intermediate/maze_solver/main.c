@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        rows = atoi(argv[1]);
-        cols = atoi(argv[2]);
+        rows = atoi(argv[2]);
+        cols = atoi(argv[3]);
 
         if (argc < 3 + rows * cols)
         {
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
                 matrix[i][j] = atoi(argv[index++]);
 
         // Example: print matrix
-        printf("Matrix:\n");
+        printf("Matrix\n");
         for (int i = 0; i < rows; ++i)
             for (int j = 0; j < cols; ++j)
                 printf("%d%c", matrix[i][j], (j == cols - 1) ? '\n' : ' ');
