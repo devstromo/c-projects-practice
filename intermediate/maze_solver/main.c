@@ -8,6 +8,7 @@ int main(int argc, char *argv[])
     int rows, cols;
     if (strcmp(argv[1], "--file") == 0)
     {
+        printf("Processing input from file...\n");
         FILE *f = fopen(argv[2], "r");
         if (!f)
         {
@@ -31,6 +32,7 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "--input") == 0)
     {
+        printf("Processing input from command line arguments...\n");
         if (argc < 3)
         {
             printf("Usage: %s <rows> <cols> [data...]\n", argv[0]);
