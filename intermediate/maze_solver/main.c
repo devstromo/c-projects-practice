@@ -27,6 +27,15 @@ typedef struct
     int rear;
 } Queue;
 
+// Structure to store algorithm results for comparison
+typedef struct
+{
+    bool path_found;
+    int path_length;
+    int path[MAX_PATH][2];
+    const char *algorithm_name;
+} PathResult;
+
 // Queue operations
 void initQueue(Queue *q)
 {
@@ -63,6 +72,28 @@ bool parse_algorithm_flag(int argc, char *argv[], int start_index)
 bool is_valid_position(int r, int c, int rows, int cols)
 {
     return (r >= 0 && r < rows && c >= 0 && c < cols);
+}
+
+// Function to copy path for result storage
+void copy_path(int dest[MAX_PATH][2], int src[MAX_PATH][2], int length)
+{
+    for (int i = 0; i < length; i++)
+    {
+        dest[i][0] = src[i][0];
+        dest[i][1] = src[i][1];
+    }
+}
+
+// Function to clear visited array
+void clear_visited(int visited[MAX_SIZE][MAX_SIZE], int rows, int cols)
+{
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            visited[i][j] = 0;
+        }
+    }
 }
 
 // BFS function to find shortest path
@@ -196,10 +227,132 @@ int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100]
     return 0;
 }
 
+// Function to run both algorithms and compare results
+void compare_algorithms(int start_row, int start_col, int rows, int cols)
+{
+    PathResult dfs_result = {false, 0, {0}, "DFS"};
+    PathResult bfs_result = {false, 0, {0}, "BFS"};
+
+    int visited[MAX_SIZE][MAX_SIZE] = {0};
+    int path[MAX_PATH][2];
+    int path_len = 0;
+
+    printf("\n=== ALGORITHM COMPARISON ===\n");
+    printf("Testing both DFS and BFS from entrance (%d,%d)...\n\n", start_row, start_col);
+
+    // Test DFS
+    clear_visited(visited, rows, cols);
+    path_len = 0;
+
+    if (dfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, start_row, start_col))
+    {
+        dfs_result.path_found = true;
+        dfs_result.path_length = path_len;
+        copy_path(dfs_result.path, path, path_len);
+    }
+
+    // Test BFS
+    clear_visited(visited, rows, cols);
+    path_len = 0;
+    int parent[MAX_SIZE][MAX_SIZE][2];
+
+    if (bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent))
+    {
+        bfs_result.path_found = true;
+        bfs_result.path_length = path_len;
+        copy_path(bfs_result.path, path, path_len);
+    }
+
+    // Report results
+    printf("DFS Results:\n");
+    if (dfs_result.path_found)
+    {
+        printf("  ✓ Path found! Length: %d steps\n", dfs_result.path_length);
+        printf("  Path: ");
+        for (int i = 0; i < dfs_result.path_length; i++)
+        {
+            printf("(%d,%d)", dfs_result.path[i][0], dfs_result.path[i][1]);
+            if (i < dfs_result.path_length - 1)
+                printf(" -> ");
+        }
+        printf("\n");
+    }
+    else
+    {
+        printf("  ✗ No path found\n");
+    }
+
+    printf("\nBFS Results:\n");
+    if (bfs_result.path_found)
+    {
+        printf("  ✓ Path found! Length: %d steps\n", bfs_result.path_length);
+        printf("  Path: ");
+        for (int i = 0; i < bfs_result.path_length; i++)
+        {
+            printf("(%d,%d)", bfs_result.path[i][0], bfs_result.path[i][1]);
+            if (i < bfs_result.path_length - 1)
+                printf(" -> ");
+        }
+        printf("\n");
+    }
+    else
+    {
+        printf("  ✗ No path found\n");
+    }
+
+    // Comparison analysis
+    printf("\n=== COMPARISON ANALYSIS ===\n");
+    if (dfs_result.path_found && bfs_result.path_found)
+    {
+        printf("Both algorithms found a path!\n");
+        printf("DFS path length: %d steps\n", dfs_result.path_length);
+        printf("BFS path length: %d steps\n", bfs_result.path_length);
+
+        if (bfs_result.path_length < dfs_result.path_length)
+        {
+            printf("BFS found a shorter path by %d steps (BFS guarantees shortest path)\n",
+                   dfs_result.path_length - bfs_result.path_length);
+        }
+        else if (dfs_result.path_length < bfs_result.path_length)
+        {
+            printf("DFS found a shorter path by %d steps (unusual - check implementation)\n",
+                   bfs_result.path_length - dfs_result.path_length);
+        }
+        else
+        {
+            printf("Both algorithms found paths of equal length!\n");
+        }
+    }
+    else if (dfs_result.path_found && !bfs_result.path_found)
+    {
+        printf("Only DFS found a path (implementation error in BFS?)\n");
+    }
+    else if (!dfs_result.path_found && bfs_result.path_found)
+    {
+        printf("Only BFS found a path (implementation error in DFS?)\n");
+    }
+    else
+    {
+        printf("Neither algorithm found a path - maze has no solution\n");
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int rows, cols;
     bool use_dfs = true;
+    bool compare_mode = false;
+
+    // Check for compare flag
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "--compare") == 0)
+        {
+            compare_mode = true;
+            break;
+        }
+    }
+
     if (strcmp(argv[1], "--file") == 0)
     {
         printf("Processing input from file...\n");
@@ -222,7 +375,10 @@ int main(int argc, char *argv[])
             for (int j = 0; j < cols; ++j)
                 fscanf(f, "%d", &matrix[i][j]);
 
-        use_dfs = !parse_algorithm_flag(argc, argv, 3);
+        if (!compare_mode)
+        {
+            use_dfs = !parse_algorithm_flag(argc, argv, 3);
+        }
         fclose(f);
     }
     else if (strcmp(argv[1], "--input") == 0)
@@ -252,8 +408,13 @@ int main(int argc, char *argv[])
         for (int i = 0; i < rows; ++i)
             for (int j = 0; j < cols; ++j)
                 printf("%d%c", matrix[i][j], (j == cols - 1) ? '\n' : ' ');
-        use_dfs = !parse_algorithm_flag(argc, argv, 4 + rows * cols);
+
+        if (!compare_mode)
+        {
+            use_dfs = !parse_algorithm_flag(argc, argv, 4 + rows * cols);
+        }
     }
+
     printf("Maze Solver Program\n");
 
     // Find entrance (first open cell on border)
@@ -298,52 +459,60 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // Initialize visited array and path
-    int visited[100][100] = {0};
-    int path[10000][2];
-    int path_len = 0;
-
-    // Try to solve the maze
-    if (use_dfs)
+    // Run comparison mode or single algorithm
+    if (compare_mode)
     {
-        printf("Using DFS to find path from entrance (%d,%d)...\n", start_row, start_col);
-        if (dfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, start_row, start_col))
-        {
-            printf("Path found!\n");
-            printf("Path from entrance to exit:\n");
-            for (int i = 0; i < path_len; i++)
-            {
-                printf("(%d,%d)", path[i][0], path[i][1]);
-                if (i < path_len - 1)
-                    printf(" -> ");
-            }
-            printf("\n");
-        }
-        else
-        {
-            printf("No path found from entrance to exit!\n");
-        }
+        compare_algorithms(start_row, start_col, rows, cols);
     }
     else
     {
-        // For BFS, we need a parent array to reconstruct the path
-        int parent[100][100][2];
-        printf("Using BFS to find shortest path from entrance (%d,%d)...\n", start_row, start_col);
-        if (bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent))
+        // Initialize visited array and path
+        int visited[100][100] = {0};
+        int path[10000][2];
+        int path_len = 0;
+
+        // Try to solve the maze
+        if (use_dfs)
         {
-            printf("Shortest path found!\n");
-            printf("Path from entrance to exit:\n");
-            for (int i = 0; i < path_len; i++)
+            printf("Using DFS to find path from entrance (%d,%d)...\n", start_row, start_col);
+            if (dfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, start_row, start_col))
             {
-                printf("(%d,%d)", path[i][0], path[i][1]);
-                if (i < path_len - 1)
-                    printf(" -> ");
+                printf("Path found! Length: %d steps\n", path_len);
+                printf("Path from entrance to exit:\n");
+                for (int i = 0; i < path_len; i++)
+                {
+                    printf("(%d,%d)", path[i][0], path[i][1]);
+                    if (i < path_len - 1)
+                        printf(" -> ");
+                }
+                printf("\n");
             }
-            printf("\n");
+            else
+            {
+                printf("No path found from entrance to exit!\n");
+            }
         }
         else
         {
-            printf("No path found from entrance to exit!\n");
+            // For BFS, we need a parent array to reconstruct the path
+            int parent[100][100][2];
+            printf("Using BFS to find shortest path from entrance (%d,%d)...\n", start_row, start_col);
+            if (bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent))
+            {
+                printf("Shortest path found! Length: %d steps\n", path_len);
+                printf("Path from entrance to exit:\n");
+                for (int i = 0; i < path_len; i++)
+                {
+                    printf("(%d,%d)", path[i][0], path[i][1]);
+                    if (i < path_len - 1)
+                        printf(" -> ");
+                }
+                printf("\n");
+            }
+            else
+            {
+                printf("No path found from entrance to exit!\n");
+            }
         }
     }
 
