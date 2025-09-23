@@ -2,6 +2,45 @@
 #include "stdlib.h"
 #include "string.h"
 
+// Function to perform DFS and find path from start to exit
+int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100][100], 
+        int path[10000][2], int *path_len, int start_row, int start_col) {
+    // Check boundaries and walls
+    if (r < 0 || r >= rows || c < 0 || c >= cols) return 0;
+    if (matrix[r][c] == 1 || visited[r][c]) return 0;
+
+    // Mark current cell as visited
+    visited[r][c] = 1;
+    
+    // Add current position to path
+    path[*path_len][0] = r;
+    path[*path_len][1] = c;
+    (*path_len)++;
+
+    // If we reached a border cell different from start, we found an exit
+    if ((r == 0 || r == rows-1 || c == 0 || c == cols-1) && 
+        (r != start_row || c != start_col)) {
+        return 1;
+    }
+
+    // Try all four directions: up, right, down, left
+    int dr[] = {-1, 0, 1, 0};
+    int dc[] = {0, 1, 0, -1};
+    
+    for (int d = 0; d < 4; d++) {
+        int new_r = r + dr[d];
+        int new_c = c + dc[d];
+        
+        if (dfs(new_r, new_c, rows, cols, matrix, visited, path, path_len, start_row, start_col)) {
+            return 1;
+        }
+    }
+
+    // If no path is found, backtrack
+    (*path_len)--;
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     int matrix[100][100];
@@ -62,9 +101,56 @@ int main(int argc, char *argv[])
                 printf("%d%c", matrix[i][j], (j == cols - 1) ? '\n' : ' ');
     }
     printf("Maze Solver Program\n");
-    // Implement maze solving logic here
 
-    // Example output
-    printf("Maze solved successfully!\n");
+    // Find entrance (first open cell on border)
+    int start_row = -1, start_col = -1;
+    
+    // Check first and last column
+    for (int i = 0; i < rows && start_row == -1; i++) {
+        if (matrix[i][0] == 0) {
+            start_row = i;
+            start_col = 0;
+        } else if (matrix[i][cols-1] == 0) {
+            start_row = i;
+            start_col = cols-1;
+        }
+    }
+    
+    // Check first and last row if no entrance found
+    if (start_row == -1) {
+        for (int j = 0; j < cols && start_row == -1; j++) {
+            if (matrix[0][j] == 0) {
+                start_row = 0;
+                start_col = j;
+            } else if (matrix[rows-1][j] == 0) {
+                start_row = rows-1;
+                start_col = j;
+            }
+        }
+    }
+
+    if (start_row == -1) {
+        printf("No entrance found on maze boundary!\n");
+        return 1;
+    }
+
+    // Initialize visited array and path
+    int visited[100][100] = {0};
+    int path[10000][2];
+    int path_len = 0;
+
+    // Try to solve the maze
+    if (dfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, start_row, start_col)) {
+        printf("Path found!\n");
+        printf("Path from entrance to exit:\n");
+        for (int i = 0; i < path_len; i++) {
+            printf("(%d,%d)", path[i][0], path[i][1]);
+            if (i < path_len - 1) printf(" -> ");
+        }
+        printf("\n");
+    } else {
+        printf("No path found from entrance to exit!\n");
+    }
+
     return 0;
 }
