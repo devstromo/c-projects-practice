@@ -4,84 +4,110 @@
 #include <stdbool.h>
 
 #define MAX_QUEUE_SIZE 10000
+#define MAX_SIZE 100
+#define MAX_PATH 10000
 
+// Fix the matrix declaration issue
+int matrix[MAX_SIZE][MAX_SIZE]; // Use consistently
 // Direction arrays for both DFS and BFS
 static const int DR[] = {-1, 0, 1, 0};
 static const int DC[] = {0, 1, 0, -1};
 
 // Queue structure for BFS
-typedef struct {
+typedef struct
+{
     int row;
     int col;
 } Point;
 
-typedef struct {
+typedef struct
+{
     Point items[MAX_QUEUE_SIZE];
     int front;
     int rear;
 } Queue;
 
 // Queue operations
-void initQueue(Queue *q) {
+void initQueue(Queue *q)
+{
     q->front = q->rear = 0;
 }
 
-bool isQueueEmpty(Queue *q) {
+bool isQueueEmpty(Queue *q)
+{
     return q->front == q->rear;
 }
 
-void enqueue(Queue *q, int row, int col) {
-    if (q->rear >= MAX_QUEUE_SIZE) return;
+bool enqueue(Queue *q, int row, int col)
+{
+    if (q->rear >= MAX_QUEUE_SIZE)
+        return false;
     q->items[q->rear].row = row;
     q->items[q->rear].col = col;
     q->rear++;
+    return true;
 }
 
-Point dequeue(Queue *q) {
+Point dequeue(Queue *q)
+{
     Point p = q->items[q->front];
     q->front++;
     return p;
 }
 
+bool parse_algorithm_flag(int argc, char *argv[], int start_index)
+{
+    return (start_index < argc && strcmp(argv[start_index], "--bfs") == 0);
+}
+
 // BFS function to find shortest path
-int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100], 
-        int visited[100][100], int path[10000][2], int *path_len, 
-        int parent[100][100][2]) {
+int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
+        int visited[100][100], int path[10000][2], int *path_len,
+        int parent[100][100][2])
+{
     Queue q;
     initQueue(&q);
-    
+
     // Initialize visited and parent arrays
-    memset(visited, 0, sizeof(int) * 100 * 100);
-    memset(parent, -1, sizeof(int) * 100 * 100 * 2);
-    
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            parent[i][j][0] = parent[i][j][1] = -1;
+        }
+    }
     // Start BFS
     enqueue(&q, start_row, start_col);
     visited[start_row][start_col] = 1;
-    
+
     int found_exit = 0;
     int exit_row = -1, exit_col = -1;
-    
-    while (!isQueueEmpty(&q)) {
+
+    while (!isQueueEmpty(&q))
+    {
         Point current = dequeue(&q);
         int r = current.row;
         int c = current.col;
-        
+
         // Check if we reached an exit
-        if ((r == 0 || r == rows-1 || c == 0 || c == cols-1) && 
-            (r != start_row || c != start_col)) {
+        if ((r == 0 || r == rows - 1 || c == 0 || c == cols - 1) &&
+            (r != start_row || c != start_col))
+        {
             found_exit = 1;
             exit_row = r;
             exit_col = c;
             break;
         }
-        
+
         // Try all four directions
-        for (int d = 0; d < 4; d++) {
+        for (int d = 0; d < 4; d++)
+        {
             int new_r = r + DR[d];
             int new_c = c + DC[d];
-            
-            if (new_r >= 0 && new_r < rows && new_c >= 0 && new_c < cols && 
-                matrix[new_r][new_c] == 0 && !visited[new_r][new_c]) {
+
+            if (new_r >= 0 && new_r < rows && new_c >= 0 && new_c < cols &&
+                matrix[new_r][new_c] == 0 && !visited[new_r][new_c])
+            {
                 visited[new_r][new_c] = 1;
                 parent[new_r][new_c][0] = r;
                 parent[new_r][new_c][1] = c;
@@ -89,35 +115,38 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
             }
         }
     }
-    
-    if (found_exit) {
+
+    if (found_exit)
+    {
         // Reconstruct path from exit to start
         int curr_r = exit_row;
         int curr_c = exit_col;
         int temp_path[10000][2];
         int temp_len = 0;
-        
-        while (curr_r != -1 && curr_c != -1) {
+
+        while (curr_r != -1 && curr_c != -1)
+        {
             temp_path[temp_len][0] = curr_r;
             temp_path[temp_len][1] = curr_c;
             temp_len++;
-            
+
             int next_r = parent[curr_r][curr_c][0];
             int next_c = parent[curr_r][curr_c][1];
             curr_r = next_r;
             curr_c = next_c;
         }
-        
+
         // Reverse path to get start to exit
         *path_len = temp_len;
-        for (int i = 0; i < temp_len; i++) {
+        for (int i = 0; i < temp_len; i++)
+        {
             path[i][0] = temp_path[temp_len - 1 - i][0];
             path[i][1] = temp_path[temp_len - 1 - i][1];
         }
-        
+
         return 1;
     }
-    
+
     return 0;
 }
 
