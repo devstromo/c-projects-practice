@@ -82,3 +82,4 @@ Makefile
 *.csv
 **/bookstore/**
 *.log
+*.todo
