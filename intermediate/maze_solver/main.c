@@ -159,8 +159,7 @@ int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100]
         int path[10000][2], int *path_len, int start_row, int start_col)
 {
     // Check boundaries and walls
-    if (r < 0 || r >= rows || c < 0 || c >= cols)
-        return 0;
+    if (!is_valid_position(r, c, rows, cols)) return 0;
     if (matrix[r][c] == 1 || visited[r][c])
         return 0;
 
@@ -197,7 +196,6 @@ int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100]
 
 int main(int argc, char *argv[])
 {
-    int matrix[100][100];
     int rows, cols;
     bool use_dfs = true;
     if (strcmp(argv[1], "--file") == 0)
