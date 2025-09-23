@@ -2,6 +2,9 @@
 #include "stdlib.h"
 #include "string.h"
 
+static const int DR[] = {-1, 0, 1, 0};
+static const int DC[] = {0, 1, 0, -1};
+
 // Function to perform DFS and find path from start to exit
 int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100][100], 
         int path[10000][2], int *path_len, int start_row, int start_col) {
@@ -23,13 +26,9 @@ int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100]
         return 1;
     }
 
-    // Try all four directions: up, right, down, left
-    int dr[] = {-1, 0, 1, 0};
-    int dc[] = {0, 1, 0, -1};
-    
     for (int d = 0; d < 4; d++) {
-        int new_r = r + dr[d];
-        int new_c = c + dc[d];
+        int new_r = r + DR[d];
+        int new_c = c + DC[d];
         
         if (dfs(new_r, new_c, rows, cols, matrix, visited, path, path_len, start_row, start_col)) {
             return 1;
