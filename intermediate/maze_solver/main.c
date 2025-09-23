@@ -60,7 +60,8 @@ bool parse_algorithm_flag(int argc, char *argv[], int start_index)
     return (start_index < argc && strcmp(argv[start_index], "--bfs") == 0);
 }
 
-bool is_valid_position(int r, int c, int rows, int cols) {
+bool is_valid_position(int r, int c, int rows, int cols)
+{
     return (r >= 0 && r < rows && c >= 0 && c < cols);
 }
 
@@ -159,7 +160,8 @@ int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100]
         int path[10000][2], int *path_len, int start_row, int start_col)
 {
     // Check boundaries and walls
-    if (!is_valid_position(r, c, rows, cols)) return 0;
+    if (!is_valid_position(r, c, rows, cols))
+        return 0;
     if (matrix[r][c] == 1 || visited[r][c])
         return 0;
 
@@ -220,14 +222,7 @@ int main(int argc, char *argv[])
             for (int j = 0; j < cols; ++j)
                 fscanf(f, "%d", &matrix[i][j]);
 
-        if (strcmp(argv[3], "--bfs") == 0)
-        {
-            use_dfs = false;
-        }
-        else
-        {
-            use_dfs = true;
-        }
+        use_dfs = !parse_algorithm_flag(argc, argv, 3);
         fclose(f);
     }
     else if (strcmp(argv[1], "--input") == 0)
@@ -259,14 +254,7 @@ int main(int argc, char *argv[])
         for (int i = 0; i < rows; ++i)
             for (int j = 0; j < cols; ++j)
                 printf("%d%c", matrix[i][j], (j == cols - 1) ? '\n' : ' ');
-        if (strcmp(argv[4], "--bfs") == 0)
-        {
-            use_dfs = false; // Placeholder for other algorithms
-        }
-        else
-        {
-            use_dfs = true;
-        }
+        use_dfs = !parse_algorithm_flag(argc, argv, 4 + rows * cols);
     }
     printf("Maze Solver Program\n");
 
