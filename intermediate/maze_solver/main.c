@@ -60,6 +60,10 @@ bool parse_algorithm_flag(int argc, char *argv[], int start_index)
     return (start_index < argc && strcmp(argv[start_index], "--bfs") == 0);
 }
 
+bool is_valid_position(int r, int c, int rows, int cols) {
+    return (r >= 0 && r < rows && c >= 0 && c < cols);
+}
+
 // BFS function to find shortest path
 int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
         int visited[100][100], int path[10000][2], int *path_len,
@@ -105,7 +109,7 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
             int new_r = r + DR[d];
             int new_c = c + DC[d];
 
-            if (new_r >= 0 && new_r < rows && new_c >= 0 && new_c < cols &&
+            if (is_valid_position(new_r, new_c, rows, cols) &&
                 matrix[new_r][new_c] == 0 && !visited[new_r][new_c])
             {
                 visited[new_r][new_c] = 1;
