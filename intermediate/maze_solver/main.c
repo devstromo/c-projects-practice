@@ -237,13 +237,11 @@ int main(int argc, char *argv[])
         rows = atoi(argv[2]);
         cols = atoi(argv[3]);
 
-        if (argc < 3 + rows * cols)
+        if (argc < 4 + rows * cols)
         {
             printf("Error: Not enough data provided.\n");
             return 1;
         }
-
-        int matrix[rows][cols];
 
         int index = 4;
         for (int i = 0; i < rows; ++i)
