@@ -14,16 +14,17 @@ int matrix[MAX_SIZE][MAX_SIZE]; // Use consistently
 static const int DR[] = {-1, 0, 1, 0};
 static const int DC[] = {0, 1, 0, -1};
 
-// Queue structure for BFS
+// Position structure for coordinates
 typedef struct
 {
     int row;
     int col;
-} Point;
+} Position;
 
+// Queue structure for BFS
 typedef struct
 {
-    Point items[MAX_QUEUE_SIZE];
+    Position items[MAX_QUEUE_SIZE];
     int front;
     int rear;
 } Queue;
@@ -33,7 +34,7 @@ typedef struct
 {
     bool path_found;
     int path_length;
-    int path[MAX_PATH][2];
+    Position path[MAX_PATH];
     const char *algorithm_name;
 } PathResult;
 
@@ -48,19 +49,18 @@ bool isQueueEmpty(Queue *q)
     return q->front == q->rear;
 }
 
-bool enqueue(Queue *q, int row, int col)
+bool enqueue(Queue *q, Position pos)
 {
     if (q->rear >= MAX_QUEUE_SIZE)
         return false;
-    q->items[q->rear].row = row;
-    q->items[q->rear].col = col;
+    q->items[q->rear] = pos;
     q->rear++;
     return true;
 }
 
-Point dequeue(Queue *q)
+Position dequeue(Queue *q)
 {
-    Point p = q->items[q->front];
+    Position p = q->items[q->front];
     q->front++;
     return p;
 }
@@ -76,12 +76,11 @@ bool is_valid_position(int r, int c, int rows, int cols)
 }
 
 // Function to copy path for result storage
-void copy_path(int dest[MAX_PATH][2], int src[MAX_PATH][2], int length)
+void copy_path(Position dest[MAX_PATH], Position src[MAX_PATH], int length)
 {
     for (int i = 0; i < length; i++)
     {
-        dest[i][0] = src[i][0];
-        dest[i][1] = src[i][1];
+        dest[i] = src[i];
     }
 }
 
@@ -98,8 +97,8 @@ void clear_visited(int visited[MAX_SIZE][MAX_SIZE], int rows, int cols)
 }
 
 // BFS function to find shortest path
-int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
-        int visited[100][100], int path[10000][2], int *path_len,
+int bfs(Position start, int rows, int cols, int matrix[100][100],
+        int visited[100][100], Position path[10000], int *path_len,
         int parent[100][100][2])
 {
     Queue q;
@@ -114,28 +113,28 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
         }
     }
     // Start BFS
-    if (!enqueue(&q, start_row, start_col))
+    if (!enqueue(&q, start))
     {
         return -1; // Queue overflow
     }
-    visited[start_row][start_col] = 1;
+    visited[start.row][start.col] = 1;
 
     int found_exit = 0;
-    int exit_row = -1, exit_col = -1;
+    Position exit_pos = {-1, -1};
 
     while (!isQueueEmpty(&q))
     {
-        Point current = dequeue(&q);
+        Position current = dequeue(&q);
         int r = current.row;
         int c = current.col;
 
         // Check if we reached an exit
         if ((r == 0 || r == rows - 1 || c == 0 || c == cols - 1) &&
-            (r != start_row || c != start_col))
+            (r != start.row || c != start.col))
         {
             found_exit = 1;
-            exit_row = r;
-            exit_col = c;
+            exit_pos.row = r;
+            exit_pos.col = c;
             break;
         }
 
@@ -151,7 +150,8 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
                 visited[new_r][new_c] = 1;
                 parent[new_r][new_c][0] = r;
                 parent[new_r][new_c][1] = c;
-                if (!enqueue(&q, new_r, new_c))
+                Position new_pos = {new_r, new_c};
+                if (!enqueue(&q, new_pos))
                 {
                     return -1; // Queue overflow
                 }
@@ -162,29 +162,24 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
     if (found_exit)
     {
         // Reconstruct path from exit to start
-        int curr_r = exit_row;
-        int curr_c = exit_col;
-        int temp_path[10000][2];
+        Position curr = exit_pos;
+        Position temp_path[10000];
         int temp_len = 0;
 
-        while (curr_r != -1 && curr_c != -1)
+        while (curr.row != -1 && curr.col != -1)
         {
-            temp_path[temp_len][0] = curr_r;
-            temp_path[temp_len][1] = curr_c;
+            temp_path[temp_len] = curr;
             temp_len++;
 
-            int next_r = parent[curr_r][curr_c][0];
-            int next_c = parent[curr_r][curr_c][1];
-            curr_r = next_r;
-            curr_c = next_c;
+            Position next = {parent[curr.row][curr.col][0], parent[curr.row][curr.col][1]};
+            curr = next;
         }
 
         // Reverse path to get start to exit
         *path_len = temp_len;
         for (int i = 0; i < temp_len; i++)
         {
-            path[i][0] = temp_path[temp_len - 1 - i][0];
-            path[i][1] = temp_path[temp_len - 1 - i][1];
+            path[i] = temp_path[temp_len - 1 - i];
         }
 
         return 1;
@@ -194,9 +189,10 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
 }
 
 // Function to perform DFS and find path from start to exit
-int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100][100],
-        int path[10000][2], int *path_len, int start_row, int start_col)
+int dfs(Position pos, int rows, int cols, int matrix[100][100], int visited[100][100],
+        Position path[10000], int *path_len, Position start)
 {
+    int r = pos.row, c = pos.col;
     // Check boundaries and walls
     if (!is_valid_position(r, c, rows, cols))
         return 0;
@@ -207,13 +203,12 @@ int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100]
     visited[r][c] = 1;
 
     // Add current position to path
-    path[*path_len][0] = r;
-    path[*path_len][1] = c;
+    path[*path_len] = pos;
     (*path_len)++;
 
     // If we reached a border cell different from start, we found an exit
     if ((r == 0 || r == rows - 1 || c == 0 || c == cols - 1) &&
-        (r != start_row || c != start_col))
+        (r != start.row || c != start.col))
     {
         return 1;
     }
@@ -222,8 +217,9 @@ int dfs(int r, int c, int rows, int cols, int matrix[100][100], int visited[100]
     {
         int new_r = r + DR[d];
         int new_c = c + DC[d];
+        Position new_pos = {new_r, new_c};
 
-        if (dfs(new_r, new_c, rows, cols, matrix, visited, path, path_len, start_row, start_col))
+        if (dfs(new_pos, rows, cols, matrix, visited, path, path_len, start))
         {
             return 1;
         }
@@ -241,7 +237,7 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
     PathResult bfs_result = {false, 0, {0}, "BFS"};
 
     int visited[MAX_SIZE][MAX_SIZE] = {0};
-    int path[MAX_PATH][2];
+    Position path[MAX_PATH];
     int path_len = 0;
 
     printf("\n=== ALGORITHM COMPARISON ===\n");
@@ -251,7 +247,8 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
     clear_visited(visited, rows, cols);
     path_len = 0;
 
-    if (dfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, start_row, start_col))
+    Position start_pos = {start_row, start_col};
+    if (dfs(start_pos, rows, cols, matrix, visited, path, &path_len, start_pos))
     {
         dfs_result.path_found = true;
         dfs_result.path_length = path_len;
@@ -263,7 +260,7 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
     path_len = 0;
     int parent[MAX_SIZE][MAX_SIZE][2];
 
-    int bfs_status = bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent);
+    int bfs_status = bfs(start_pos, rows, cols, matrix, visited, path, &path_len, parent);
     if (bfs_status == 1)
     {
         bfs_result.path_found = true;
@@ -284,7 +281,7 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
         printf("  Path: ");
         for (int i = 0; i < dfs_result.path_length; i++)
         {
-            printf("(%d,%d)", dfs_result.path[i][0], dfs_result.path[i][1]);
+            printf("(%d,%d)", dfs_result.path[i].row, dfs_result.path[i].col);
             if (i < dfs_result.path_length - 1)
                 printf(" -> ");
         }
@@ -302,7 +299,7 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
         printf("  Path: ");
         for (int i = 0; i < bfs_result.path_length; i++)
         {
-            printf("(%d,%d)", bfs_result.path[i][0], bfs_result.path[i][1]);
+            printf("(%d,%d)", bfs_result.path[i].row, bfs_result.path[i].col);
             if (i < bfs_result.path_length - 1)
                 printf(" -> ");
         }
@@ -562,20 +559,21 @@ int main(int argc, char *argv[])
     {
         // Initialize visited array and path
         int visited[100][100] = {0};
-        int path[10000][2];
+        Position path[10000];
         int path_len = 0;
 
         // Try to solve the maze
+        Position start_pos = {start_row, start_col};
         if (use_dfs)
         {
             printf("Using DFS to find path from entrance (%d,%d)...\n", start_row, start_col);
-            if (dfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, start_row, start_col))
+            if (dfs(start_pos, rows, cols, matrix, visited, path, &path_len, start_pos))
             {
                 printf("Path found! Length: %d steps\n", path_len);
                 printf("Path from entrance to exit:\n");
                 for (int i = 0; i < path_len; i++)
                 {
-                    printf("(%d,%d)", path[i][0], path[i][1]);
+                    printf("(%d,%d)", path[i].row, path[i].col);
                     if (i < path_len - 1)
                         printf(" -> ");
                 }
@@ -591,14 +589,14 @@ int main(int argc, char *argv[])
             // For BFS, we need a parent array to reconstruct the path
             int parent[100][100][2];
             printf("Using BFS to find shortest path from entrance (%d,%d)...\n", start_row, start_col);
-            int bfs_status = bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent);
+            int bfs_status = bfs(start_pos, rows, cols, matrix, visited, path, &path_len, parent);
             if (bfs_status == 1)
             {
                 printf("Shortest path found! Length: %d steps\n", path_len);
                 printf("Path from entrance to exit:\n");
                 for (int i = 0; i < path_len; i++)
                 {
-                    printf("(%d,%d)", path[i][0], path[i][1]);
+                    printf("(%d,%d)", path[i].row, path[i].col);
                     if (i < path_len - 1)
                         printf(" -> ");
                 }
