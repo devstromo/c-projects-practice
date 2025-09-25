@@ -114,7 +114,10 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
         }
     }
     // Start BFS
-    enqueue(&q, start_row, start_col);
+    if (!enqueue(&q, start_row, start_col))
+    {
+        return -1; // Queue overflow
+    }
     visited[start_row][start_col] = 1;
 
     int found_exit = 0;
@@ -148,7 +151,10 @@ int bfs(int start_row, int start_col, int rows, int cols, int matrix[100][100],
                 visited[new_r][new_c] = 1;
                 parent[new_r][new_c][0] = r;
                 parent[new_r][new_c][1] = c;
-                enqueue(&q, new_r, new_c);
+                if (!enqueue(&q, new_r, new_c))
+                {
+                    return -1; // Queue overflow
+                }
             }
         }
     }
@@ -257,11 +263,17 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
     path_len = 0;
     int parent[MAX_SIZE][MAX_SIZE][2];
 
-    if (bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent))
+    int bfs_status = bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent);
+    if (bfs_status == 1)
     {
         bfs_result.path_found = true;
         bfs_result.path_length = path_len;
         copy_path(bfs_result.path, path, path_len);
+    }
+    else if (bfs_status == -1)
+    {
+        fprintf(stderr, "Error: Queue overflow in BFS. Maze may be too large or have too many open cells.\n");
+        return;
     }
 
     // Report results
@@ -298,7 +310,7 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
     }
     else
     {
-        printf("  ✗ No path found\n");
+        printf("  ✗ No path found. The maze may be unsolvable or all exits are blocked.\n");
     }
 
     // Comparison analysis
@@ -326,15 +338,15 @@ void compare_algorithms(int start_row, int start_col, int rows, int cols)
     }
     else if (dfs_result.path_found && !bfs_result.path_found)
     {
-        printf("Only DFS found a path (implementation error in BFS?)\n");
+        printf("Only DFS found a path. BFS guarantees shortest path if one exists; check for implementation issues.\n");
     }
     else if (!dfs_result.path_found && bfs_result.path_found)
     {
-        printf("Only BFS found a path (implementation error in DFS?)\n");
+        printf("Only BFS found a path. DFS may have limitations in certain mazes; verify the maze structure.\n");
     }
     else
     {
-        printf("Neither algorithm found a path - maze has no solution\n");
+        printf("Neither algorithm found a path. The maze has no solution from the entrance to any exit.\n");
     }
 }
 
@@ -378,13 +390,13 @@ int main(int argc, char *argv[])
         int read_dims = fscanf(f, "%d %d", &rows, &cols);
         if (read_dims != 2)
         {
-            fprintf(stderr, "Error: Failed to read dimensions from file\n");
+            fprintf(stderr, "Error: Could not read two integers for dimensions from file. Check file format (first line should be 'rows cols').\n");
             fclose(f);
             return 1;
         }
         if (rows < 1 || rows > 100 || cols < 1 || cols > 100)
         {
-            fprintf(stderr, "Error: Dimensions must be between 1 and 100\n");
+            fprintf(stderr, "Error: Dimensions %d x %d are out of range. Must be between 1 and 100.\n", rows, cols);
             fclose(f);
             return 1;
         }
@@ -398,13 +410,13 @@ int main(int argc, char *argv[])
                 int val;
                 if (fscanf(f, "%d", &val) != 1)
                 {
-                    fprintf(stderr, "Error: Not enough matrix values in file\n");
+                    fprintf(stderr, "Error: Expected %d matrix values, but only %d found in file.\n", expected, count);
                     fclose(f);
                     return 1;
                 }
                 if (val != 0 && val != 1)
                 {
-                    fprintf(stderr, "Error: Matrix values must be 0 or 1\n");
+                    fprintf(stderr, "Error: Invalid matrix value %d at position (%d,%d). Values must be 0 or 1.\n", val, i, j);
                     fclose(f);
                     return 1;
                 }
@@ -416,7 +428,7 @@ int main(int argc, char *argv[])
         int extra;
         if (fscanf(f, "%d", &extra) == 1)
         {
-            fprintf(stderr, "Error: Too many matrix values in file\n");
+            fprintf(stderr, "Error: Too many matrix values in file. Expected exactly %d values.\n", expected);
             fclose(f);
             return 1;
         }
@@ -441,26 +453,26 @@ int main(int argc, char *argv[])
         rows = strtol(argv[2], &endptr, 10);
         if (*endptr != '\0' || errno == ERANGE)
         {
-            fprintf(stderr, "Error: Invalid rows value\n");
+            fprintf(stderr, "Error: Invalid rows value '%s'. Must be a valid integer.\n", argv[2]);
             return 1;
         }
         errno = 0;
         cols = strtol(argv[3], &endptr, 10);
         if (*endptr != '\0' || errno == ERANGE)
         {
-            fprintf(stderr, "Error: Invalid cols value\n");
+            fprintf(stderr, "Error: Invalid cols value '%s'. Must be a valid integer.\n", argv[3]);
             return 1;
         }
         if (rows < 1 || rows > 100 || cols < 1 || cols > 100)
         {
-            fprintf(stderr, "Error: Dimensions must be between 1 and 100\n");
+            fprintf(stderr, "Error: Dimensions %d x %d are out of range. Must be between 1 and 100.\n", rows, cols);
             return 1;
         }
 
         int expected = rows * cols;
         if (argc != 4 + expected)
         {
-            fprintf(stderr, "Error: Incorrect number of matrix values provided\n");
+            fprintf(stderr, "Error: Expected %d matrix values after dimensions, but got %d arguments.\n", expected, argc - 4);
             return 1;
         }
 
@@ -473,7 +485,7 @@ int main(int argc, char *argv[])
                 int val = strtol(argv[index], &endptr, 10);
                 if (*endptr != '\0' || errno == ERANGE || (val != 0 && val != 1))
                 {
-                    fprintf(stderr, "Error: Matrix values must be 0 or 1\n");
+                    fprintf(stderr, "Error: Invalid matrix value '%s' at position (%d,%d). Values must be 0 or 1.\n", argv[index], i, j);
                     return 1;
                 }
                 matrix[i][j] = val;
@@ -537,7 +549,7 @@ int main(int argc, char *argv[])
 
     if (start_row == -1)
     {
-        printf("No entrance found on maze boundary!\n");
+        fprintf(stderr, "Error: No entrance found on maze boundary. Ensure at least one border cell is open (value 0).\n");
         return 1;
     }
 
@@ -571,7 +583,7 @@ int main(int argc, char *argv[])
             }
             else
             {
-                printf("No path found from entrance to exit!\n");
+                printf("No path found from entrance to exit. The maze may be unsolvable or all exits are blocked.\n");
             }
         }
         else
@@ -579,7 +591,8 @@ int main(int argc, char *argv[])
             // For BFS, we need a parent array to reconstruct the path
             int parent[100][100][2];
             printf("Using BFS to find shortest path from entrance (%d,%d)...\n", start_row, start_col);
-            if (bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent))
+            int bfs_status = bfs(start_row, start_col, rows, cols, matrix, visited, path, &path_len, parent);
+            if (bfs_status == 1)
             {
                 printf("Shortest path found! Length: %d steps\n", path_len);
                 printf("Path from entrance to exit:\n");
@@ -591,9 +604,14 @@ int main(int argc, char *argv[])
                 }
                 printf("\n");
             }
+            else if (bfs_status == -1)
+            {
+                fprintf(stderr, "Error: Queue overflow in BFS. Maze may be too large or have too many open cells.\n");
+                return 1;
+            }
             else
             {
-                printf("No path found from entrance to exit!\n");
+                printf("No path found from entrance to exit. The maze may be unsolvable or all exits are blocked.\n");
             }
         }
     }
