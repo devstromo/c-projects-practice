@@ -1,6 +1,7 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "string.h"
+#include <errno.h>
 #include <stdbool.h>
 
 #define MAX_QUEUE_SIZE 10000
@@ -343,6 +344,12 @@ int main(int argc, char *argv[])
     bool use_dfs = true;
     bool compare_mode = false;
 
+    if (argc < 2)
+    {
+        fprintf(stderr, "Usage: %s --file <filename> [--bfs] [--compare] or %s --input <rows> <cols> <matrix_values...> [--bfs] [--compare]\n", argv[0], argv[0]);
+        return 1;
+    }
+
     // Check for compare flag
     for (int i = 1; i < argc; i++)
     {
@@ -355,6 +362,11 @@ int main(int argc, char *argv[])
 
     if (strcmp(argv[1], "--file") == 0)
     {
+        if (argc < 3)
+        {
+            fprintf(stderr, "Error: --file requires a filename\n");
+            return 1;
+        }
         printf("Processing input from file...\n");
         FILE *f = fopen(argv[2], "r");
         if (!f)
@@ -363,17 +375,51 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        fscanf(f, "%d %d", &rows, &cols);
-        if (rows <= 0 || cols <= 0 || rows > 100 || cols > 100)
+        int read_dims = fscanf(f, "%d %d", &rows, &cols);
+        if (read_dims != 2)
         {
-            fprintf(stderr, "Invalid matrix dimensions\n");
+            fprintf(stderr, "Error: Failed to read dimensions from file\n");
+            fclose(f);
+            return 1;
+        }
+        if (rows < 1 || rows > 100 || cols < 1 || cols > 100)
+        {
+            fprintf(stderr, "Error: Dimensions must be between 1 and 100\n");
             fclose(f);
             return 1;
         }
 
-        for (int i = 0; i < rows; ++i)
-            for (int j = 0; j < cols; ++j)
-                fscanf(f, "%d", &matrix[i][j]);
+        int expected = rows * cols;
+        int count = 0;
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                int val;
+                if (fscanf(f, "%d", &val) != 1)
+                {
+                    fprintf(stderr, "Error: Not enough matrix values in file\n");
+                    fclose(f);
+                    return 1;
+                }
+                if (val != 0 && val != 1)
+                {
+                    fprintf(stderr, "Error: Matrix values must be 0 or 1\n");
+                    fclose(f);
+                    return 1;
+                }
+                matrix[i][j] = val;
+                count++;
+            }
+        }
+        // Check for extra values
+        int extra;
+        if (fscanf(f, "%d", &extra) == 1)
+        {
+            fprintf(stderr, "Error: Too many matrix values in file\n");
+            fclose(f);
+            return 1;
+        }
 
         if (!compare_mode)
         {
@@ -383,26 +429,57 @@ int main(int argc, char *argv[])
     }
     else if (strcmp(argv[1], "--input") == 0)
     {
-        printf("Processing input from command line arguments...\n");
-        if (argc < 3)
+        if (argc < 4)
         {
-            printf("Usage: %s <rows> <cols> [data...]\n", argv[0]);
+            fprintf(stderr, "Error: --input requires at least rows and cols\n");
+            return 1;
+        }
+        printf("Processing input from command line arguments...\n");
+
+        char *endptr;
+        errno = 0;
+        rows = strtol(argv[2], &endptr, 10);
+        if (*endptr != '\0' || errno == ERANGE)
+        {
+            fprintf(stderr, "Error: Invalid rows value\n");
+            return 1;
+        }
+        errno = 0;
+        cols = strtol(argv[3], &endptr, 10);
+        if (*endptr != '\0' || errno == ERANGE)
+        {
+            fprintf(stderr, "Error: Invalid cols value\n");
+            return 1;
+        }
+        if (rows < 1 || rows > 100 || cols < 1 || cols > 100)
+        {
+            fprintf(stderr, "Error: Dimensions must be between 1 and 100\n");
             return 1;
         }
 
-        rows = atoi(argv[2]);
-        cols = atoi(argv[3]);
-
-        if (argc < 4 + rows * cols)
+        int expected = rows * cols;
+        if (argc != 4 + expected)
         {
-            printf("Error: Not enough data provided.\n");
+            fprintf(stderr, "Error: Incorrect number of matrix values provided\n");
             return 1;
         }
 
         int index = 4;
-        for (int i = 0; i < rows; ++i)
-            for (int j = 0; j < cols; ++j)
-                matrix[i][j] = atoi(argv[index++]);
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < cols; j++)
+            {
+                errno = 0;
+                int val = strtol(argv[index], &endptr, 10);
+                if (*endptr != '\0' || errno == ERANGE || (val != 0 && val != 1))
+                {
+                    fprintf(stderr, "Error: Matrix values must be 0 or 1\n");
+                    return 1;
+                }
+                matrix[i][j] = val;
+                index++;
+            }
+        }
 
         printf("Matrix\n");
         for (int i = 0; i < rows; ++i)
@@ -413,6 +490,11 @@ int main(int argc, char *argv[])
         {
             use_dfs = !parse_algorithm_flag(argc, argv, 4 + rows * cols);
         }
+    }
+    else
+    {
+        fprintf(stderr, "Usage: %s --file <filename> [--bfs] [--compare] or %s --input <rows> <cols> <matrix_values...> [--bfs] [--compare]\n", argv[0], argv[0]);
+        return 1;
     }
 
     printf("Maze Solver Program\n");
