@@ -83,3 +83,4 @@ Makefile
 **/bookstore/**
 *.log
 *.todo
+.claude/settings.local.json
