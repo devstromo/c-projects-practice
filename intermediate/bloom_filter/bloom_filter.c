@@ -8,29 +8,68 @@
 // Hash Functions
 // ============================================================================
 
-// MurmurHash3 - 32-bit finalizer mix
+/**
+ * MurmurHash3 scramble function (32-bit mixing)
+ *
+ * Applies bit-mixing transformations to a 32-bit block to maximize avalanche
+ * effect (small input changes cause large output changes).
+ *
+ * Steps:
+ *   1. Multiply by c1 (0xcc9e2d51) - spreads bits via multiplication
+ *   2. Rotate left by 15 bits     - mixes high and low bits
+ *   3. Multiply by c2 (0x1b873593) - further diffusion
+ *
+ * These constants are carefully chosen primes that provide good bit diffusion.
+ * The rotation ensures bits from any position affect all other positions.
+ *
+ * @param k  The 32-bit block to scramble
+ * @return   The scrambled 32-bit value
+ */
 static uint32_t murmur3_32_scramble(uint32_t k) {
-    k *= 0xcc9e2d51;
-    k = (k << 15) | (k >> 17);
-    k *= 0x1b873593;
+    k *= 0xcc9e2d51;            // c1: multiplication spreads bits
+    k = (k << 15) | (k >> 17);  // ROTL15: circular left rotation by 15
+    k *= 0x1b873593;            // c2: second multiplication for more diffusion
     return k;
 }
 
-// MurmurHash3 - 32-bit implementation
+/**
+ * MurmurHash3 - 32-bit implementation
+ *
+ * A fast, non-cryptographic hash function created by Austin Appleby.
+ * Provides excellent distribution and avalanche properties for hash tables.
+ *
+ * Algorithm overview:
+ *   1. Process input in 4-byte blocks, mixing each into the hash state
+ *   2. Handle remaining 1-3 bytes separately
+ *   3. Apply finalization mixing to ensure all bits affect the output
+ *
+ * Properties:
+ *   - O(n) time complexity where n is input length
+ *   - Excellent avalanche: each input bit affects ~50% of output bits
+ *   - No cryptographic security (not collision-resistant against attacks)
+ *   - Deterministic: same input + seed always produces same output
+ *
+ * @param key   Pointer to the input data
+ * @param len   Length of input data in bytes
+ * @param seed  Initial seed value (allows different hash "families")
+ * @return      32-bit hash value
+ */
 static uint32_t murmur3_32(const uint8_t *key, size_t len, uint32_t seed) {
     uint32_t h = seed;
     uint32_t k;
 
-    // Process 4-byte chunks
+    // Process 4-byte chunks (len >> 2 = len / 4)
+    // Each block is scrambled and XORed into the running hash
     for (size_t i = len >> 2; i; i--) {
-        memcpy(&k, key, sizeof(uint32_t));
+        memcpy(&k, key, sizeof(uint32_t));  // Safe unaligned read
         key += sizeof(uint32_t);
         h ^= murmur3_32_scramble(k);
-        h = (h << 13) | (h >> 19);
-        h = h * 5 + 0xe6546b64;
+        h = (h << 13) | (h >> 19);          // ROTL13: rotate left by 13
+        h = h * 5 + 0xe6546b64;             // Mix with prime multiplier
     }
 
-    // Process remaining bytes
+    // Process remaining 1-3 bytes (len & 3 = len % 4)
+    // Pack remaining bytes into k, then scramble
     k = 0;
     for (size_t i = len & 3; i; i--) {
         k <<= 8;
@@ -38,29 +77,73 @@ static uint32_t murmur3_32(const uint8_t *key, size_t len, uint32_t seed) {
     }
     h ^= murmur3_32_scramble(k);
 
-    // Finalize
-    h ^= (uint32_t)len;
-    h ^= h >> 16;
-    h *= 0x85ebca6b;
-    h ^= h >> 13;
-    h *= 0xc2b2ae35;
-    h ^= h >> 16;
+    // Finalization: force all bits to avalanche
+    // This ensures even small inputs produce well-distributed hashes
+    h ^= (uint32_t)len;     // Mix in the length
+    h ^= h >> 16;           // Mix high bits into low bits
+    h *= 0x85ebca6b;        // Multiplication by prime
+    h ^= h >> 13;           // More bit mixing
+    h *= 0xc2b2ae35;        // Another prime multiplication
+    h ^= h >> 16;           // Final mix
 
     return h;
 }
 
-// FNV-1a hash for variety
+/**
+ * FNV-1a hash function (32-bit)
+ *
+ * Fowler-Noll-Vo hash, variant 1a. A simple, fast hash function that
+ * processes input one byte at a time. The "1a" variant XORs before
+ * multiplying, which provides slightly better avalanche than FNV-1.
+ *
+ * Algorithm:
+ *   hash = FNV_offset_basis XOR seed
+ *   for each byte:
+ *       hash = hash XOR byte
+ *       hash = hash * FNV_prime
+ *
+ * Constants:
+ *   - FNV_offset_basis (32-bit): 2166136261 (0x811c9dc5)
+ *   - FNV_prime (32-bit):        16777619   (0x01000193)
+ *
+ * Used here as a secondary hash for double-hashing in the Bloom filter.
+ * Combined with MurmurHash3, it allows generating k hash values efficiently:
+ *   h(i) = murmur3(data) + i * fnv1a(data)
+ *
+ * @param data  Pointer to input data
+ * @param len   Length of input data in bytes
+ * @param seed  Seed value XORed with offset basis for variation
+ * @return      32-bit hash value
+ */
 static uint32_t fnv1a_32(const uint8_t *data, size_t len, uint32_t seed) {
-    uint32_t hash = 2166136261u ^ seed;
+    uint32_t hash = 2166136261u ^ seed;  // FNV offset basis XOR seed
     for (size_t i = 0; i < len; i++) {
-        hash ^= data[i];
-        hash *= 16777619u;
+        hash ^= data[i];                  // XOR with byte (1a variant)
+        hash *= 16777619u;                // Multiply by FNV prime
     }
     return hash;
 }
 
-// Generate k hash values using double hashing technique
-// h(i) = h1 + i * h2, which is more efficient than k independent hash functions
+/**
+ * Generate k hash indices using double hashing technique
+ *
+ * Instead of computing k independent hash functions (expensive), we use
+ * the double hashing optimization from Kirsch & Mitzenmacher (2006):
+ *
+ *   g(i) = h1(x) + i * h2(x)  for i = 0, 1, ..., k-1
+ *
+ * This produces k hash values with only 2 hash function calls, while
+ * maintaining the same false positive probability as k independent hashes.
+ *
+ * Paper: "Less Hashing, Same Performance: Building a Better Bloom Filter"
+ * https://www.eecs.harvard.edu/~michaelm/postscripts/rsa2008.pdf
+ *
+ * @param data         Input data to hash
+ * @param len          Length of input data
+ * @param num_hashes   Number of hash indices to generate (k)
+ * @param filter_size  Size of the Bloom filter in bits (for modulo)
+ * @param indices      Output array to store k bit indices
+ */
 static void get_hash_indices(const void *data, size_t len, size_t num_hashes,
                              size_t filter_size, size_t *indices) {
     uint32_t h1 = murmur3_32((const uint8_t *)data, len, 0);
