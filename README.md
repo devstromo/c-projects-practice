@@ -15,7 +15,7 @@ Welcome to my C programming projects repository! The primary objective of this r
 Each project is categorized by its difficulty level:
 
 * `beginner/`: Simple programs covering basic syntax, input/output operations, loops, and conditionals.
-* `intermediate/`: Projects involving algorithms, data structures, and file handling, including a maze solver, Bloom filter, bank system, and library manager.
+* `intermediate/`: Projects involving algorithms, data structures, and file handling, including a maze solver, Bloom filter, [token bucket rate limiter](intermediate/token_bucket/README.md), bank system, and library manager.
 * `misc/`: Small experiments with pointers and function addresses.
 
 Advanced projects may be added as the repository grows.

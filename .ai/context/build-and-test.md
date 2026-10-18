@@ -63,6 +63,28 @@ Invalid-parameter tests intentionally print error messages to stderr. A positive
 membership result means an item *may* exist; tests must allow false positives.
 Inserted items must not produce false negatives under successful operation.
 
+## Token bucket demo and tests
+
+```sh
+cc -std=c11 -Wall -Wextra -Wpedantic \
+  intermediate/token_bucket/token_bucket.c \
+  intermediate/token_bucket/main.c -o build/token_bucket
+./build/token_bucket
+./build/token_bucket --live
+
+cc -std=c11 -Wall -Wextra -Wpedantic \
+  intermediate/token_bucket/token_bucket.c \
+  intermediate/token_bucket/test_token_bucket.c -o build/test_token_bucket
+./build/test_token_bucket
+```
+
+The default demo uses a deterministic timeline; `--live` uses POSIX monotonic time
+and takes about three seconds on macOS/Linux. The core and tests use C11 without
+POSIX dependencies. Keep assertions enabled. The tests report six groups covering
+bursts, refill, capacity, invalid arguments, backward time, and large refills.
+See the [exercise README](../../intermediate/token_bucket/README.md) for the flow
+diagram, API contract, and use cases.
+
 ## Maze solver fixture
 
 ```sh
