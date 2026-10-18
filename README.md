@@ -15,8 +15,10 @@ Welcome to my C programming projects repository! The primary objective of this r
 Each project is categorized by its difficulty level:
 
 * `beginner/`: Simple programs covering basic syntax, input/output operations, loops, and conditionals.
-* `medium/`: Intermediate problems that involve more complex algorithms, data structures, and file handling.
-* `hard/`: Advanced projects, such as implementing algorithms (sorting, searching), memory management, and solving real-world problems.
+* `intermediate/`: Projects involving algorithms, data structures, and file handling, including a maze solver, Bloom filter, bank system, and library manager.
+* `misc/`: Small experiments with pointers and function addresses.
+
+Advanced projects may be added as the repository grows.
 
 ## How to Run the Projects
 
@@ -24,26 +26,32 @@ Each project is categorized by its difficulty level:
 
     ```bash
     git clone https://github.com/devstromo/c-projects-practice.git
-    cd c-projects
+    cd c-projects-practice
     ```
 
 2. Navigate to the project folder of your choice:
 
     ```bash
-    cd beginner/
+    cd beginner/temperature_converter
     ```
 
 3. Compile the code using a C compiler:
 
     ```bash
-    gcc -o outputfile sourcefile.c
+    cc -std=c11 -Wall -Wextra -Wpedantic main.c -o /tmp/temperature_converter
     ```
 
 4. Run the compiled executable:
 
     ```bash
-    ./outputfile
+    /tmp/temperature_converter
     ```
+
+Projects with multiple source files need explicit source lists. See the [build and test guide](.ai/context/build-and-test.md) for calculator, Bloom filter, and other examples.
+
+## Working with AI Assistants
+
+[AGENTS.md](AGENTS.md) describes repository conventions and how to verify changes. The tool-agnostic [.ai/](.ai/README.md) directory contains reusable skills, rules, project context, workflows, prompts, and a session handoff template. Any assistant can read these Markdown files directly; no plugin installation is required.
 
 ## Future Plans
 
