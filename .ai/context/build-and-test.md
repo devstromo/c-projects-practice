@@ -3,7 +3,8 @@
 Run these commands from the repository root in a POSIX shell. Prerequisites are
 a C compiler available as `cc` (Clang or GCC) and the standard C library. The
 calculator and Bloom filter also use the math library. There are no third-party
-C dependencies or shared build scripts.
+C dependencies or shared build scripts. The token bucket's optional threaded
+programs use POSIX threads and require `-pthread`.
 
 Use C11 and warnings as a starting point; the repository does not currently
 enforce a language standard or a zero-warning build. Existing warnings should be
@@ -84,6 +85,29 @@ POSIX dependencies. Keep assertions enabled. The tests report six groups coverin
 bursts, refill, capacity, invalid arguments, backward time, and large refills.
 See the [exercise README](../../intermediate/token_bucket/README.md) for the flow
 diagram, API contract, and use cases.
+
+### Threaded token bucket
+
+```sh
+cc -std=c11 -Wall -Wextra -Wpedantic -pthread \
+  intermediate/token_bucket/token_bucket.c \
+  intermediate/token_bucket/threaded_token_bucket.c \
+  intermediate/token_bucket/threaded_demo.c -o build/threaded_token_bucket
+./build/threaded_token_bucket
+
+cc -std=c11 -Wall -Wextra -Wpedantic -pthread \
+  intermediate/token_bucket/token_bucket.c \
+  intermediate/token_bucket/threaded_token_bucket.c \
+  intermediate/token_bucket/test_threaded_token_bucket.c -o build/test_threaded_token_bucket
+./build/test_threaded_token_bucket
+```
+
+The POSIX demo shares a mutex-protected bucket among four workers and finishes
+after about 1.25 seconds; allowed/denied counts depend on scheduling. The four
+test groups include deterministic contention rounds with eight workers and a
+controlled clock, refill/capacity checks, validation/clock failure checks, and
+a default-clock smoke check. Keep assertions enabled. Join all workers before
+destroying a shared bucket.
 
 ## Maze solver fixture
 

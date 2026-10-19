@@ -2,7 +2,8 @@
 
 A small C exercise that limits how quickly work is accepted while allowing short
 bursts. It demonstrates structs, pointers to caller-owned state, elapsed-time
-arithmetic, floating-point bounds, and deterministic tests.
+arithmetic, floating-point bounds, and deterministic tests. A POSIX threads wrapper
+adds safe sharing between workers using a mutex.
 
 ## How it works
 
@@ -60,6 +61,9 @@ is at most `capacity + refill_rate * t` tokens, subject to floating-point roundi
 | `token_bucket.c` | Validation, refill, and consumption |
 | `main.c` | Scripted demo and optional live-clock demo |
 | `test_token_bucket.c` | Assertions using explicit timestamps |
+| `threaded_token_bucket.h` / `.c` | Mutex-protected bucket and clock handling |
+| `threaded_demo.c` | Four workers sharing one real-time budget |
+| `test_threaded_token_bucket.c` | Concurrent budget checks using a controlled clock |
 
 ## Build and run
 
@@ -154,6 +158,118 @@ wall-clock corrections. Using seconds relative to a recent origin helps preserve
 fractional precision. Floating-point arithmetic is approximate; this exercise is
 not intended for exact accounting at extreme magnitudes or time resolutions.
 
+## Sharing a bucket between threads
+
+The original `TokenBucket` has no internal lock. For a shared budget, use
+`ThreadedTokenBucket` from `threaded_token_bucket.h`. Its mutex protects the
+entire clock-read, refill, check, and subtraction sequence. Two workers cannot
+spend the same saved token.
+
+The clock is read **after acquiring the mutex**. If threads took timestamps before
+locking, a delayed thread could submit an older timestamp after another worker
+had already updated the bucket.
+
+```mermaid
+flowchart TD
+    A[Worker wants to perform work] --> B[Lock the shared bucket mutex]
+    B --> C[Read the monotonic clock]
+    C --> D{Clock succeeded?}
+    D -->|No| E[Unlock mutex and return error]
+    D -->|Yes| F[Refill and try to consume tokens]
+    F --> G[Unlock mutex]
+    G --> H{Decision?}
+    H -->|Allowed| I[Perform work outside the lock]
+    H -->|Denied| J[Skip work or arrange a later retry]
+    H -->|Invalid| K[Handle invalid arguments or timestamp]
+```
+
+Only admission to the work is serialized. Approved work can run in parallel.
+For example, if eight threads each request one token from a bucket containing
+one token at a fixed timestamp, exactly one succeeds. The others are denied.
+
+### Build the threaded demo and tests
+
+Run from the repository root on macOS or Linux. Add `-pthread` when compiling and
+linking the threaded programs; the original core/demo commands still work.
+
+```sh
+mkdir -p build
+cc -std=c11 -Wall -Wextra -Wpedantic -pthread \
+  intermediate/token_bucket/token_bucket.c \
+  intermediate/token_bucket/threaded_token_bucket.c \
+  intermediate/token_bucket/threaded_demo.c -o build/threaded_token_bucket
+./build/threaded_token_bucket
+
+cc -std=c11 -Wall -Wextra -Wpedantic -pthread \
+  intermediate/token_bucket/token_bucket.c \
+  intermediate/token_bucket/threaded_token_bucket.c \
+  intermediate/token_bucket/test_threaded_token_bucket.c -o build/test_threaded_token_bucket
+./build/test_threaded_token_bucket
+```
+
+The demo starts four workers sharing capacity **3** and refill rate **2 tokens per
+second**. Each worker makes six requests costing one token, with 250 ms between
+attempts. It finishes after about 1.25 seconds and prints per-worker and total
+allowed/denied counts. Counts and which workers succeed depend on scheduling;
+this implementation makes no fairness guarantee. The main thread reads each
+worker's counters only after joining that worker. The demo creates no data files.
+
+The tests keep assertions enabled and use eight workers making 128 attempts per
+contention round. A mutex/condition-variable gate releases the workers together.
+An injected clock keeps time fixed during a round, so exact expected totals are
+independent of wall-clock delays. Time advances only after the workers are joined.
+The four test groups cover shared bursts and weighted costs, fractional refill
+and capacity capping, invalid input and clock failures, and the default clock.
+
+### API and lifetime
+
+| Function | Purpose |
+| --- | --- |
+| `threaded_token_bucket_init` | Initialize a full bucket using `CLOCK_MONOTONIC` |
+| `threaded_token_bucket_init_with_clock` | Initialize with a callback and context, useful for deterministic tests |
+| `threaded_token_bucket_try_consume` | Lock, read time, refill, decide, and unlock |
+| `threaded_token_bucket_destroy` | Release the mutex after all workers have stopped |
+
+Initialize once before publishing the bucket to workers, then join **all** workers
+before destroying it. The caller owns the struct; no heap allocation is needed.
+Do not copy or move an initialized struct, directly access its fields, mix core
+calls with wrapper calls on it, or destroy it while another thread may use it.
+Failed initialization needs no destruction. A destroyed bucket can be initialized
+again before reuse.
+
+These functions return **0 on success** or a positive error code. Use
+`strerror(error)` for that code; pthread functions return errors directly rather
+than setting `errno`. For consumption, success also writes a `TokenBucketResult`:
+
+```c
+TokenBucketResult result;
+int error = threaded_token_bucket_try_consume(&bucket, 1.0, &result);
+if (error != 0) {
+    /* Handle the clock or synchronization failure; result was not written. */
+} else if (result == TOKEN_BUCKET_ALLOWED) {
+    /* Perform work here: the mutex is already unlocked. */
+} else if (result == TOKEN_BUCKET_DENIED) {
+    /* Skip work or arrange a later retry. */
+} else {
+    /* Handle an invalid cost or timestamp. */
+}
+```
+
+Clock failures release the lock and leave the token state unchanged. Invalid
+costs and timestamps return `TOKEN_BUCKET_INVALID` without changing token state.
+An unexpected unlock failure is a synchronization error: state may already have
+changed, so do not blindly retry the operation. The demo stops on errors and joins
+successfully created workers before destroying the bucket.
+
+A custom clock callback returns 0 and writes finite, nonnegative seconds, or
+returns an error code. It runs during initialization and under the bucket lock
+during consumption; it must not call back into that bucket. Keep its context
+alive until destruction and synchronize any external changes to that context.
+The default clock needs no caller-managed context.
+
+The shared bucket limits how quickly work starts. It does **not** limit the number
+of operations currently running. Use a separate concurrency limit if needed.
+
 ## Where it can be used
 
 | Use case | What tokens represent | Example policy |
@@ -175,7 +291,6 @@ and scheduling around it. For a denied valid request, the ideal wait for enough
 tokens is `(cost - bucket.tokens) / bucket.refill_rate` seconds, assuming no other
 consumer spends tokens first.
 
-Multiple threads must synchronize the entire refill-and-consume operation. Multiple
-processes or servers need shared state and an atomic decision to enforce one
-combined limit. This exercise provides a single-process, single-threaded core;
-it does not enforce concurrent-request limits or provide distributed coordination.
+Multiple threads in one process can use the wrapper above to share a budget.
+Multiple processes or servers need shared state and an atomic decision to enforce
+one combined limit. This exercise does not provide distributed coordination.

@@ -25,10 +25,11 @@ this map describes the current layout.
 | `bloom_filter/` | `main.c` | Demo uses `bloom_filter.c` and `bloom_filter.h`; separate `test_bloom_filter.c`; link `-lm` |
 | `library_manager/` | `main.c` | Book CSV, history log, local PDF copies/downloads; uses shell commands and `curl` |
 | `maze_solver/` | `main.c` | DFS, BFS, comparison mode; tracked `maze.txt` fixture; accepts `--file` or `--input` |
-| `token_bucket/` | `main.c` | Rate limiter in `token_bucket.c` and `.h`; separate `test_token_bucket.c`; scripted demo or POSIX `--live` clock demo; [README](../../intermediate/token_bucket/README.md) |
+| `token_bucket/` | `main.c`, `threaded_demo.c` | C11 core and tests; scripted/POSIX `--live` demo; pthread wrapper with a separate threaded demo and tests (`-pthread`); [README](../../intermediate/token_bucket/README.md) |
 
 The calculator, Bloom filter, and token bucket have dedicated test source files.
 Their demo and test programs each define `main` and must be built separately.
+Token bucket also has separate threaded demo and test executables.
 
 ## Pointer experiments
 
